@@ -37,17 +37,22 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     Returns:
         Cross entropy error (float)
     """
+
+
     # TODO implement this function (Task 2a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return 0
+
+    C = -targets*np.log(outputs)+(1-targets)*np.log(1-outputs) # Computes binary cross entropy loss as in Eq.3
+
+    return C
 
 
 class BinaryModel:
 
     def __init__(self):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.w = np.zeros((self.I, 1))
         self.grad = None
 
@@ -60,7 +65,7 @@ class BinaryModel:
         """
 
         # multiply each input batch by the weights
-        
+
         y = np.matmul(X,shape.w)
 
         return y
@@ -79,6 +84,10 @@ class BinaryModel:
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+
+        self.grad = -(targets - outputs)*X
+        self.grad /= outputs.shape[0]
+
 
     def zero_grad(self) -> None:
         self.grad = None
