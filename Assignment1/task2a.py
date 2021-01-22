@@ -6,6 +6,11 @@ np.random.seed(1)
 
 # jævla fittetryne
 
+def doNothing():
+
+    pass
+
+
 def pre_process_images(X: np.ndarray):
     """
     Args:
