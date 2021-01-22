@@ -2,9 +2,7 @@ import numpy as np
 import utils
 np.random.seed(1)
 
-# Hallaien din dust
-
-# donothing motherfucker
+#gutta kommuniserer gjennom git
 
 def do_nothing():
     x = 1;
@@ -60,8 +58,12 @@ class BinaryModel:
         Returns:
             y: output of model with shape [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
-        return None
+
+        # multiply each input batch by the weights
+        
+        y = np.matmul(X,shape.w)
+
+        return y
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
