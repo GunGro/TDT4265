@@ -2,13 +2,6 @@ import numpy as np
 import utils
 np.random.seed(1)
 
-#gutta kommuniserer gjennom git
-
-def do_nothing():
-    x = 1;
-    pass
-
-
 def pre_process_images(X: np.ndarray):
     """
     Args:
@@ -19,13 +12,11 @@ def pre_process_images(X: np.ndarray):
 
 
     assert X.shape[1] == 784,\
-        f"X.shape[1]: {X.shape[1]}, should be 784"
-
+        f"X.shape[1]: {X.shape[1]}, should be 784"   
+    X = np.array(X, dtype = np.float64)
     X -= np.mean(X) # subtract mean from each element
-    X /= 255 #scale elements by the size of largest (255)
-    X = np.append(X,1) #append a one to the end
-
-
+    X = X/255 #scale elements by the size of largest (255)
+    X = np.append(X, np.ones((X.shape[0], 1)), axis = 1) #append a one to the end
     return X
 
 
@@ -42,7 +33,12 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     # TODO implement this function (Task 2a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    C = -targets*np.log(outputs)+(1-targets)*np.log(1-outputs) # Computes binary cross entropy loss as in Eq.3
+        
+    outputs = outputs[0]
+    targets = targets[0]    
+    C = -targets*np.log2(outputs)#+(1-targets)*np.log2(1-outputs) # Computes binary cross entropy loss as in Eq.3
+    print(C, targets, outputs)
+    raise Exception("fuck tgis")
     return C
 
 
@@ -63,9 +59,7 @@ class BinaryModel:
         """
 
         # multiply each input batch by the weights
-
-        y = np.matmul(X,shape.w)
-
+        y = 1/(1+ np.exp(-np.matmul(X,self.w)))
         return y
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
@@ -77,14 +71,14 @@ class BinaryModel:
             targets: labels/targets of each image of shape: [batch size, 1]
         """
         # TODO implement this function (Task 2a)
+        
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
-        self.grad = np.zeros_like(self.w)
+            
+        self.grad = -(targets - outputs)*X  #dC_doutput 
+        self.grad = np.mean(self.grad, axis = 0, keepdims = True).T
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
-
-        self.grad = -(targets - outputs)*X
-        self.grad /= outputs.shape[0]
 
 
     def zero_grad(self) -> None:
@@ -113,6 +107,7 @@ def gradient_approximation_test(model: BinaryModel, X: np.ndarray, Y: np.ndarray
         logits = model.forward(X)
         model.backward(X, logits, Y)
         difference = gradient_approximation - model.grad[i, 0]
+        #print(abs(difference))
         assert abs(difference) <= epsilon**2,\
             f"Calculated gradient is incorrect. " \
             f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i,0]}\n" \
