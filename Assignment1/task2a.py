@@ -6,7 +6,7 @@ np.random.seed(1)
 
 # jævla fittetryne
 
-def doNothing():
+def do_nothing():
 
     pass
 
