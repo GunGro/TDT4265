@@ -4,7 +4,7 @@ np.random.seed(1)
 
 # Hallaien din dust
 
-# jævla fittetryne
+# donothing motherfucker
 
 def do_nothing():
 
