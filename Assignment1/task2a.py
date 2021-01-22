@@ -7,7 +7,7 @@ np.random.seed(1)
 # donothing motherfucker
 
 def do_nothing():
-
+    x = 1;
     pass
 
 
