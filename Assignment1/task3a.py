@@ -71,6 +71,7 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
+    print(Y,num_classes)
     raise NotImplementedError
 
 
