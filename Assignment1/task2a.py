@@ -2,7 +2,7 @@ import numpy as np
 import utils
 np.random.seed(1)
 
-
+# Hallaien din dust
 def pre_process_images(X: np.ndarray):
     """
     Args:
