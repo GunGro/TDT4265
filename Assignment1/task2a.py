@@ -3,6 +3,9 @@ import utils
 np.random.seed(1)
 
 # Hallaien din dust
+
+# jævla fittetryne
+
 def pre_process_images(X: np.ndarray):
     """
     Args:
