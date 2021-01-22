@@ -1,5 +1,7 @@
 import numpy as np
 import utils
+import math
+
 np.random.seed(1)
 
 def pre_process_images(X: np.ndarray):
@@ -33,13 +35,10 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     # TODO implement this function (Task 2a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-        
-    outputs = outputs[0]
-    targets = targets[0]    
-    C = -targets*np.log2(outputs)#+(1-targets)*np.log2(1-outputs) # Computes binary cross entropy loss as in Eq.3
-    print(C, targets, outputs)
-    raise Exception("fuck tgis")
-    return C
+    targets = np.array(targets,dtype=np.float)
+    cost = -targets*np.log(outputs)-(1-targets)*np.log(1-outputs)
+    cost = np.mean(cost)
+    return cost
 
 
 class BinaryModel:
@@ -48,7 +47,7 @@ class BinaryModel:
         # Define number of input nodes
         self.I = 785
         self.w = np.zeros((self.I, 1))
-        self.grad = None
+        self.grad = np.zeros(self.w.shape)
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
@@ -74,9 +73,11 @@ class BinaryModel:
         
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
-            
-        self.grad = -(targets - outputs)*X  #dC_doutput 
+
+        self.grad = -(targets-outputs)*X
         self.grad = np.mean(self.grad, axis = 0, keepdims = True).T
+
+
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
@@ -106,8 +107,9 @@ def gradient_approximation_test(model: BinaryModel, X: np.ndarray, Y: np.ndarray
         # Actual gradient
         logits = model.forward(X)
         model.backward(X, logits, Y)
+        #print(model.grad.shape,model.grad)
         difference = gradient_approximation - model.grad[i, 0]
-        #print(abs(difference))
+        #print(abs(difference), difference.shape)
         assert abs(difference) <= epsilon**2,\
             f"Calculated gradient is incorrect. " \
             f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i,0]}\n" \
