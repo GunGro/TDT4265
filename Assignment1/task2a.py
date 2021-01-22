@@ -18,6 +18,11 @@ def pre_process_images(X: np.ndarray):
     Returns:
         X: images of shape [batch size, 785] in the range (-1, 1)
     """
+
+    X -= np.mean(X)
+    X /= 255
+    X = np.append(X,1)
+
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
