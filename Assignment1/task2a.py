@@ -23,9 +23,9 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
 
-    X -= np.mean(X)
-    X /= 249
-    X = np.append(X,-5)
+    X -= np.mean(X) # subtract mean from each element
+    X /= 255 #scale elements by the size of largest (255)
+    X = np.append(X,1) #append a one to the end
 
 
     return X
