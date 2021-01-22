@@ -2,6 +2,7 @@ from typing import Generator
 import mnist
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 def batch_loader(
@@ -24,12 +25,16 @@ def batch_loader(
     if not drop_last:
         num_batches = int(np.ceil(len(X) / batch_size))
     indices = list(range(len(X)))
-
+    print(indices)
+    shuffled_indices = random.shuffle(indices)
+    assert isinstance(shuffled_indices, list)
+    print(shuffled_indices)
     # TODO (task 2e) implement dataset shuffling here.
 
     for i in range(num_batches):
         # select a set of indices for each batch of samples
-        batch_indices = indices[i*batch_size:(i+1)*batch_size]
+        batch_indices = shuffled_indices[i*batch_size:(i+1)*batch_size]
+
         x = X[batch_indices]
         y = Y[batch_indices]
         # return both images (x) and labels (y)

@@ -76,6 +76,7 @@ class BaseTrainer:
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
+
             for X_batch, Y_batch in iter(train_loader):
                 loss = self.train_step(X_batch, Y_batch)
                 # Track training loss continuously
@@ -87,8 +88,8 @@ class BaseTrainer:
                     train_history["accuracy"][global_step] = accuracy_train
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
-
-                    # TODO (Task 2d): Implement early stopping here.
-                    # You can access the validation loss in val_history["loss"]
+                    if len(val_history['loss']) > 10: # Check that there is at more than 10 elements in the validation history
+                        if all([val_history['loss'][global_step-num_steps_per_val*i] < val_history['loss'][global_step] for i in range(1,11)]): # Check if all the previous 10 elements are smaller than the current element
+                           return train_history, val_history # If so, terminate
                 global_step += 1
         return train_history, val_history
