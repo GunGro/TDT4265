@@ -39,12 +39,9 @@ class SoftmaxModel:
         Returns:
             y: output of model with shape [batch size, num_outputs]
         """
-
-        outputs = 1/(1+np.exp(-(np.matmul(X,self.w)))) # To first layer
-
-        outputs = np.exp(outputs) # Softmax output
-        outputs = outputs / np.sum(outputs, axis=-1, keepdims=True)
-
+        outputs = np.matmul(X,self.w)
+        #outputs = 1/(1+np.exp(-(np.matmul(X,self.w)))) # To first layer
+        outputs = np.exp(outputs) / np.sum(np.exp(outputs), axis=-1, keepdims=True)
         return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
@@ -65,9 +62,7 @@ class SoftmaxModel:
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
         self.grad = np.zeros_like(self.w)
-        self.grad = np.einsum('ij,ik->ikj',-(targets-outputs),X)
-        print(X.shape)
-        print(self.grad)
+        self.grad = np.einsum('ij,ik->ikj', -targets+outputs,X)
         self.grad = np.mean(self.grad, axis = 0)
         assert self.grad.shape == self.w.shape,\
              f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
