@@ -12,11 +12,10 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     Returns:
         Cross entropy error (float)
     """
-    cost = -np.mean((np.sum(targets*np.log(outputs),axis=-1)))
 
     assert targets.shape == outputs.shape,\
-        f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-
+    f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
+    cost = -np.mean((np.sum(targets*np.log(outputs),axis=-1)))
     return cost
 
 class SoftmaxModel:
@@ -40,7 +39,6 @@ class SoftmaxModel:
             y: output of model with shape [batch size, num_outputs]
         """
         outputs = np.matmul(X,self.w)
-        #outputs = 1/(1+np.exp(-(np.matmul(X,self.w)))) # To first layer
         outputs = np.exp(outputs) / np.sum(np.exp(outputs), axis=-1, keepdims=True)
         return outputs
 
@@ -62,7 +60,7 @@ class SoftmaxModel:
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
         self.grad = np.zeros_like(self.w)
-        self.grad = np.einsum('ij,ik->ikj', -targets+outputs,X)
+        self.grad = np.einsum('ij,ik->ikj', - targets+outputs,X)
         self.grad = np.mean(self.grad, axis = 0)
         assert self.grad.shape == self.w.shape,\
              f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
@@ -83,10 +81,7 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
         Y: shape [Num examples, num classes]
     """
     vec = np.zeros((Y.shape[0],num_classes))
-
-    for i in range(len(vec)):
-        vec[i,Y[i,0]] = 1
-
+    vec[np.arange(Y.shape[0]), np.array(Y[:,0], dtype = np.int)] = 1.0
     return vec
 
 
