@@ -56,13 +56,12 @@ class SoftmaxModel:
 
         # To implement L2 regularization task (4b) you can get the lambda value in self.l2_reg_lambda 
         # which is defined in the constructor.
+
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
         self.grad = np.zeros_like(self.w)
         self.grad = np.einsum('ij,ik->ikj', -(targets-outputs),X)
-        #self.grad = (targets - outputs)
-
         self.grad = np.mean(self.grad, axis = 0)
         assert self.grad.shape == self.w.shape,\
              f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
