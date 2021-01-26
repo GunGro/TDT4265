@@ -65,8 +65,7 @@ class SoftmaxTrainer(BaseTrainer):
         return loss, accuracy_train, accuracy_val
 
 def plot_two_weights(model1, model2, save_as = None):
-    fig, ax = plt.subplots(2, 10, gridspec_kw = {'wspace':0, 'hspace':0})
-    print(ax.shape)
+    fig, ax = plt.subplots(2, 10, gridspec_kw = {'wspace':0, 'hspace':0,'bottom':0.67})
     for i in range(10):
         ax[0,i].imshow(model1.w[1:,i].reshape((28,28)))
         ax[0,i].axis("off")
