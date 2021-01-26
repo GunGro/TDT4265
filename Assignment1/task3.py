@@ -64,13 +64,26 @@ class SoftmaxTrainer(BaseTrainer):
             X_val, Y_val, self.model)
         return loss, accuracy_train, accuracy_val
 
-
+def plot_two_weights(model1, model2, save_as = None):
+    fig, ax = plt.subplots(2, 10, gridspec_kw = {'wspace':0, 'hspace':0})
+    print(ax.shape)
+    for i in range(10):
+        ax[0,i].imshow(model1.w[1:,i].reshape((28,28)))
+        ax[0,i].axis("off")
+        ax[1,i].imshow(model2.w[1:,i].reshape((28,28)))
+        ax[1,i].axis("off")
+    if not save_as is None:
+        plt.savefig(save_as + ".png")
+    plt.show()
+    
+    
 if __name__ == "__main__":
+    
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
     num_epochs = 50
     learning_rate = 0.01
     batch_size = 128
-    l2_reg_lambda = 0
+    l2_reg_lambda = 0.0
     shuffle_dataset = True
 
     # Load dataset
@@ -127,10 +140,14 @@ if __name__ == "__main__":
     )
     train_history_reg01, val_history_reg01 = trainer.train(num_epochs)
     # You can finish the rest of task 4 below this point.
+    
+    
+    
 
     # Plotting of softmax weights (Task 4b)
-    #plt.imsave("task4b_softmax_weight.png", weight, cmap="gray")
-
+    plot_two_weights(model, model1, "Task_4b_output")
+    
+    
     # Plotting of accuracy for difference values of lambdas (task 4c)
     l2_lambdas = [1, .1, .01, .001]
     plt.savefig("task4c_l2_reg_accuracy.png")
