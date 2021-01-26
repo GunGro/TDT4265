@@ -35,7 +35,7 @@ class SoftmaxTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
-        targets = one_hot_encode(Y_batch, self.model.num_outputs)
+        targets = Y_batch
         outputs = self.model.forward(X_batch)
         self.model.backward(X_batch, outputs, targets)
         
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     print("Final Train accuracy:", calculate_accuracy(X_train, Y_train, model))
     print("Final Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
 
-    plt.ylim([0.2, .6])
+    #plt.ylim([0.2, .6])
     utils.plot_loss(train_history["loss"],
                     "Training Loss", npoints_to_average=10)
     utils.plot_loss(val_history["loss"], "Validation Loss")
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     plt.show()
 
     # Plot accuracy
-    plt.ylim([0.89, .93])
+    #plt.ylim([0.89, .93])
     utils.plot_loss(train_history["accuracy"], "Training Accuracy")
     utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
     plt.xlabel("Number of Training Steps")
