@@ -16,7 +16,8 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
+    outputs = model.forward()
+    accuracy = np.mean(np.argmax(outputs, axis = -1) == np.argmax(targets, axis = -1))
     return accuracy
 
 
@@ -47,7 +48,6 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2c)
-
         loss = 0
 
         loss = cross_entropy_loss(Y_batch, logits)  # sol
