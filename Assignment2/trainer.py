@@ -1,8 +1,6 @@
 import numpy as np
 import utils
 
-# NO NEED TO CHANGE THIS CODE
-
 
 class BaseTrainer:
 
@@ -35,6 +33,8 @@ class BaseTrainer:
             accuracy_ (float): accuracy over the whole dataset
         Returns:
             loss value (float) on batch
+            accuracy_train (float): Accuracy on train dataset
+            accuracy_val (float): Accuracy on the validation dataset
         """
         pass
 
@@ -76,7 +76,6 @@ class BaseTrainer:
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
-
             for X_batch, Y_batch in iter(train_loader):
                 loss = self.train_step(X_batch, Y_batch)
                 # Track training loss continuously
@@ -88,10 +87,6 @@ class BaseTrainer:
                     train_history["accuracy"][global_step] = accuracy_train
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
-                    if len(val_history['loss']) > 10 and \
-                       all([val_history['loss'][global_step-num_steps_per_val*i] > val_history['loss'][global_step - 10 * num_steps_per_val] 
-                            for i in range(0,10)]): # Check if all the previous 10 elements are smaller than the current element
-                        print('Training stopped early.')
-                        return train_history, val_history # If so, terminate
+                    # TODO: Implement early stopping (copy from last assignment)
                 global_step += 1
         return train_history, val_history

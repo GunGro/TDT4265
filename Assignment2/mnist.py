@@ -22,8 +22,8 @@ def download_mnist():
         filepath = SAVE_PATH.joinpath(name[1])
         if filepath.is_file():
             continue
-        print("Downloading "+name[1]+"...")
-        request.urlretrieve(base_url+name[1], filepath)
+        print("Downloading " + name[1] + "...")
+        request.urlretrieve(base_url + name[1], filepath)
 
 
 def extract_mnist():
@@ -37,7 +37,7 @@ def extract_mnist():
         with gzip.open(path, 'rb') as f:
             data = np.frombuffer(f.read(), np.uint8, offset=16)
             print(data.shape)
-            mnist[name[0]] = data.reshape(-1,   28*28)
+            mnist[name[0]] = data.reshape(-1, 28 * 28)
     # Load labels
     for name in filename[2:]:
         path = SAVE_PATH.joinpath(name[1])
