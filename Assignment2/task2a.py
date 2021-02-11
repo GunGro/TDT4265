@@ -1,6 +1,5 @@
 import numpy as np
 import utils
-import math
 
 np.random.seed(1)
 
@@ -16,8 +15,11 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"   
     X = np.array(X, dtype = np.float64)
-    X -= np.mean(X) # subtract mean from each element
-    X = X/255 #scale elements by the size of largest (255)
+    
+    # Take the interval (min (x), max(x)) and maps to (-1,1)
+    min = 0
+    max = 255
+    X = (X - (min + max)/2)/((max-min)/2)
     X = np.append(X, np.ones((X.shape[0], 1)), axis = 1) #append a one to the end
     return X
 
