@@ -8,6 +8,16 @@ def sigmoid(Z):
     A = 1 / (1 + np.exp(-Z))
     return A
 
+def improved_sigmoid(Z):
+    A = 1.7159*np.tanh(1.5*Z)
+    return A
+
+def dsigmoid(Z):
+    return Z*(1-Z)
+
+def improved_dsigmoid(Z):
+    return (1-Z**2)*(1.5*1.7159)
+
 def pre_process_images(X: np.ndarray, mu, std):
     """
     Args:
@@ -73,6 +83,12 @@ class SoftmaxModel:
         self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
 
+        if self.use_improved_sigmoid:
+            self.act = improved_sigmoid
+            self.deact = improved_dsigmoid
+        else:
+            self.act = sigmoid
+            self.deact = dsigmoid
         # Define number of output nodes
         # neurons_per_layer = [64, 10] indicates that we will have two layers:
         # A hidden layer with 64 neurons and a output layer with 10 neurons.
@@ -85,7 +101,10 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size) #(size, prev) #
             print("Initializing weight to shape:", w_shape)
-            w = np.random.uniform(-1, 1, w_shape)
+            if use_improved_weight_init:
+                w = np.random.normal(0, 1/np.sqrt(prev), w_shape)
+            else:
+                w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
@@ -107,7 +126,7 @@ class SoftmaxModel:
         outputs = X
 
         for i, weights in enumerate(self.ws[:-1]):
-            outputs = sigmoid(np.matmul(outputs, weights))
+            outputs = self.act(np.matmul(outputs, weights))
             self.hidden_layer_outputs[i] = outputs
 
         # Passing from final hidden layer to output layer
@@ -116,7 +135,6 @@ class SoftmaxModel:
         # Softmaxing outputlayer
         outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1, keepdims = True))
         #print("Hidden layer output:",self.hidden_layer_outputs)
-
         return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
@@ -147,7 +165,7 @@ class SoftmaxModel:
             return np.einsum("ij, ijk -> ik", delta_j, dz_dy)
         
         delta_k = -(targets-outputs)
-        dact = outputs*(1-outputs)
+        dact = self.deact(outputs)
         # get gradient matrix
         self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', delta_k, self.hidden_layer_outputs[-1]),axis=0)
         # get dLoss / dlast_hidden_layer
@@ -155,7 +173,7 @@ class SoftmaxModel:
         # do the hidden layers
         for i, weights in enumerate(reversed(self.ws[1:-1])):
             z = self.hidden_layer_outputs[-1-i]
-            dact = z*(1-z)
+            dact = self.deact(z)
             # Find the weight gradient
             self.grads[-2-i] = cal_weights(dact, self.hidden_layer_outputs[-2-i], delta_j )
             # find the loss derivative of hidden layer y to pass backwards
