@@ -25,10 +25,11 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     Returns:
         Cross entropy error (float)
     """
-    assert targets.shape == outputs.shape,\
+
+    assert targets.shape == outputs.shape, \
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    cost = -np.mean((np.sum(targets * np.log(outputs), axis=-1)))
+    return cost
 
 
 class SoftmaxModel:

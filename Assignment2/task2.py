@@ -15,7 +15,7 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
     Returns:
         Accuracy (float)
     """
-    # TODO: Implement this function (copy from last assignment)
+
     outputs = model.forward()
     accuracy = np.mean(np.argmax(outputs, axis = -1) == np.argmax(targets, axis = -1))
     return accuracy
