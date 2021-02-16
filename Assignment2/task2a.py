@@ -69,7 +69,7 @@ class SoftmaxModel:
         # Always reset random seed before weight init to get comparable results.
         np.random.seed(1)
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
 
         # Define number of output nodes
@@ -82,7 +82,7 @@ class SoftmaxModel:
         self.ws = []
         prev = self.I
         for size in self.neurons_per_layer:
-            w_shape = (prev, size)
+            w_shape = (prev, size) #(size, prev) #
             print("Initializing weight to shape:", w_shape)
             w = np.zeros(w_shape)
             self.ws.append(w)
@@ -90,7 +90,7 @@ class SoftmaxModel:
         self.grads = [None for i in range(len(self.ws))]
 
         # Cache previous outputs
-        self.hidden_layer_outputs = [None]*len(self.ws)
+        self.hidden_layer_outputs = [None]*(len(self.ws)-1)
         self.softmax_input = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -110,10 +110,10 @@ class SoftmaxModel:
             self.hidden_layer_outputs[i] = outputs
 
         # Passing from final hidden layer to output layer
-        outputs = np.matmul(outputs, weights)
+        outputs = np.matmul(outputs, self.ws[-1])
         self.softmax_input = outputs
         # Softmaxing outputlayer
-        outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1))
+        outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1, keepdims = True))
         return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
@@ -131,28 +131,58 @@ class SoftmaxModel:
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
-        self.grads = []
-
+        # calculate the backwards pass across the softmax
+        def cal_weights(dact, y, delta_j):
+            #calculate dz/dw
+            dz_dw = np.einsum("ij, ik -> ijk", y, dact)
+            # return dL/dw
+            return np.mean(delta_j[:,None,:] * dz_dw, axis = 0)
+            
+        def cal_delta(dact, weights, delta_j):
+            #calculate dz/dy first
+            dz_dy = (dact[:,None,:]*weights).transpose([0,2,1])
+            return np.einsum("ij, ijk -> ik", delta_j, dz_dy)
+        
         delta_k = -(targets-outputs)
         dact = outputs*(1-outputs)
-
-        self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', -(targets-outputs), self.hidden_layer_outputs[-1]),axis=0)
-        delta_j = np.einsum('ij, ijk -> ik', self.ws[-1], delta_k)
-
-        for i, weights in enumerate(reversed(self.ws)):
+        # get gradient matrix
+        self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', delta_k, self.hidden_layer_outputs[-1]),axis=0)
+        # get dLoss / dlast_hidden_layer
+        delta_j = np.einsum('ij, kj -> ik', delta_k, self.ws[-1])
+        # do the hidden layers
+        for i, weights in enumerate(reversed(self.ws[1:-1])):
+            z = self.hidden_layer_outputs[-1-i]
+            dact = z*(1-z)
+            # Find the weight gradient
+            self.grads[-2-i] = cal_weights(dact, self.hidden_layer_outputs[-2-i], delta_j )
+            # find the loss derivative of hidden layer y to pass backwards
+            delta_j = cal_delta(dact, weights, delta_j)
+        
+        #do the first layers
+        z = self.hidden_layer_outputs[0]
+        dact = z*(1-z)
         # Find the weight gradient
-            self.grads[-i-1] = np.einsum('ij,ik->ikj', delta_k, X)
-            dact = self.hidden_layer_outputs[-i-1]*(1-self.hidden_layer_outputs[-i-1])
-            dz_dy = (dact[:, None, :]*weights).transpose([0,2,1])
-            delta_k = np.einsum("ij, ijk -> ik", delta_k, dz_dy)
+        self.grads[0] = cal_weights(dact, X, delta_j )
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
                 f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
-
-    def zero_grad(self) -> None:
-        self.grads = [None for i in range(len(self.ws))]
-
+#
+#def backward_pass(self, dL_dz, z, sum_z, y):
+#        if self.type == "softmax":
+#            J_soft = np.eye(z.shape[-1])*z[:,None,:]- np.einsum("...ij,...ik->...ijk",z, z)
+#            return np.einsum("ij,ijk->ik",dL_dz, J_soft), None, None
+#        else:
+#            dz_dsum = self.dact(sum_z, z)
+#            #make the dL_dw matrix
+#            dz_dw = np.einsum("ij, ik -> ijk",y, dz_dsum)
+#            dL_dw = np.mean(dL_dz[:,None,:] * dz_dw, axis = 0)
+#            #make the dL_dB vector
+#            dL_dB = np.mean(dL_dz * dz_dsum, axis = 0)     
+#            #make the dL_dy
+#            dz_dy = (dz_dsum[:,None,:]*self.weights).transpose([0,2,1])
+#            dL_dy = np.einsum("ij, ijk->ik",dL_dz, dz_dy)
+#            return dL_dy, dL_dw, dL_dB
 
 
 def gradient_approximation_test(
@@ -196,7 +226,8 @@ if __name__ == "__main__":
         f"Expected the vector to be [0,0,0,1,0,0,0,0,0,0], but got {Y}"
 
     X_train, Y_train, *_ = utils.load_full_mnist()
-    X_train = pre_process_images(X_train)
+    mu, std = find_mean_std(X_train)
+    X_train = pre_process_images(X_train,mu, std)
     Y_train = one_hot_encode(Y_train, 10)
     assert X_train.shape[1] == 785,\
         f"Expected X_train to have 785 elements per image. Shape was: {X_train.shape}"
