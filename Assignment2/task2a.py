@@ -85,7 +85,7 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size) #(size, prev) #
             print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
+            w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
@@ -115,7 +115,7 @@ class SoftmaxModel:
         self.softmax_input = outputs
         # Softmaxing outputlayer
         outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1, keepdims = True))
-        print("Hidden layer output:",self.hidden_layer_outputs)
+        #print("Hidden layer output:",self.hidden_layer_outputs)
 
         return outputs
 
