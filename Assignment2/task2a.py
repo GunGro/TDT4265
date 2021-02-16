@@ -1,6 +1,7 @@
 import numpy as np
 import utils
 import typing
+import random
 np.random.seed(1)
 
 def sigmoid(Z):
@@ -114,6 +115,8 @@ class SoftmaxModel:
         self.softmax_input = outputs
         # Softmaxing outputlayer
         outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1, keepdims = True))
+        print("Hidden layer output:",self.hidden_layer_outputs)
+
         return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
