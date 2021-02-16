@@ -3,6 +3,9 @@ import utils
 import typing
 np.random.seed(1)
 
+def sigmoid(Z):
+    A = 1 / (1 + np.exp(-Z))
+    return A
 
 def pre_process_images(X: np.ndarray, mu, std):
     """
@@ -19,8 +22,6 @@ def pre_process_images(X: np.ndarray, mu, std):
     X = np.append(X, np.ones((X.shape[0], 1)), axis = 1) #append a one to the end
     return X
 
-
-    return X
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):
     """
@@ -76,6 +77,7 @@ class SoftmaxModel:
         # A hidden layer with 64 neurons and a output layer with 10 neurons.
         self.neurons_per_layer = neurons_per_layer
 
+
         # Initialize the weights
         self.ws = []
         prev = self.I
@@ -87,6 +89,10 @@ class SoftmaxModel:
             prev = size
         self.grads = [None for i in range(len(self.ws))]
 
+        # Cache previous outputs
+        self.hidden_layer_outputs = [None]*len(self.ws)
+        self.softmax_input = None
+
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
         Args:
@@ -94,10 +100,21 @@ class SoftmaxModel:
         Returns:
             y: output of model with shape [batch size, num_outputs]
         """
-        # TODO implement this function (Task 2b)
         # HINT: For peforming the backward pass, you can save intermediate activations in varialbes in the forward pass.
         # such as self.hidden_layer_ouput = ...
-        return None
+
+        outputs = X
+
+        for i, weights in enumerate(self.ws[:-1]):
+            outputs = sigmoid(np.matmul(outputs, weights))
+            self.hidden_layer_outputs[i] = outputs
+
+        # Passing from final hidden layer to output layer
+        outputs = np.matmul(outputs, weights)
+        self.softmax_input = outputs
+        # Softmaxing outputlayer
+        outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1))
+        return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
@@ -109,12 +126,25 @@ class SoftmaxModel:
             outputs: outputs of model of shape: [batch size, num_outputs]
             targets: labels/targets of each image of shape: [batch size, num_classes]
         """
-        # TODO implement this function (Task 2b)
+
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         self.grads = []
+
+        delta_k = -(targets-outputs)
+        dact = outputs*(1-outputs)
+
+        self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', -(targets-outputs), self.hidden_layer_outputs[-1]),axis=0)
+        delta_j = np.einsum('ij, ijk -> ik', self.ws[-1], delta_k)
+
+        for i, weights in enumerate(reversed(self.ws)):
+        # Find the weight gradient
+            self.grads[-i-1] = np.einsum('ij,ik->ikj', delta_k, X)
+            dact = self.hidden_layer_outputs[-i-1]*(1-self.hidden_layer_outputs[-i-1])
+            dz_dy = (dact[:, None, :]*weights).transpose([0,2,1])
+            delta_k = np.einsum("ij, ijk -> ik", delta_k, dz_dy)
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
