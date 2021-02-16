@@ -87,6 +87,11 @@ class BaseTrainer:
                     train_history["accuracy"][global_step] = accuracy_train
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
-                    # TODO: Implement early stopping (copy from last assignment)
+                    if len(val_history['loss']) > 10:  # Check that there is at more than 10 elements in the validation history
+                        if all([val_history['loss'][global_step - num_steps_per_val * i] > val_history['loss'][global_step-10*num_steps_per_val]
+                                for i in range(0,10)]):  # Check if all the previous 10 elements are smaller than the current element
+                            print('Training stopped early.')
+                            print(epoch)
+                            return train_history, val_history  # If so, terminate
                 global_step += 1
         return train_history, val_history

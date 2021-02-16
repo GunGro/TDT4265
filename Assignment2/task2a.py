@@ -165,7 +165,6 @@ class SoftmaxModel:
             return np.einsum("ij, ijk -> ik", delta_j, dz_dy)
         
         delta_k = -(targets-outputs)
-        dact = self.deact(outputs)
         # get gradient matrix
         self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', delta_k, self.hidden_layer_outputs[-1]),axis=0)
         # get dLoss / dlast_hidden_layer
@@ -181,7 +180,7 @@ class SoftmaxModel:
         
         #do the first layers
         z = self.hidden_layer_outputs[0]
-        dact = z*(1-z)
+        dact = self.deact(z)
         # Find the weight gradient
         self.grads[0] = cal_weights(dact, X, delta_j )
 

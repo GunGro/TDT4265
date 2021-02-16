@@ -55,8 +55,18 @@ class SoftmaxTrainer(BaseTrainer):
         loss = cross_entropy_loss(Y_batch, outputs)
         self.model.backward(X_batch, outputs, Y_batch)
 
-        for i in range(len(self.model.ws)):
-            self.model.ws[i] -= self.model.grads[i]*self.learning_rate
+        if self.use_momentum:
+            for i in range(len(self.model.ws)):
+                update_grad = self.model.grads[i] + self.model.momentum_gamma*self.previous_grads[i]
+                self.model.ws[i] -= self.learning_rate*update_grad
+                self.previous_grads[i] = update_grad
+        else:
+            for i in range(len(self.model.ws)):
+                self.model.ws[i] -= self.model.grads[i]*self.learning_rate
+
+
+
+
 
         return loss
 
@@ -93,8 +103,8 @@ if __name__ == "__main__":
     shuffle_data = True
 
     # Settings for task 3. Keep all to false for task 2.
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
+    use_improved_sigmoid = True
+    use_improved_weight_init = True
     use_momentum = False
 
     # Load dataset
