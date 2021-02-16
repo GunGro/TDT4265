@@ -61,6 +61,7 @@ class BaseTrainer:
         """
         # Utility variables
         num_batches_per_epoch = self.X_train.shape[0] // self.batch_size
+        print(num_batches_per_epoch)
         num_steps_per_val = num_batches_per_epoch // 5
         # A tracking value of loss over all training steps
         train_history = dict(
@@ -91,6 +92,7 @@ class BaseTrainer:
                     if len(val_history['loss']) > 10: # Check that there is at more than 10 elements in the validation history
                         if all([val_history['loss'][global_step-num_steps_per_val*i] < val_history['loss'][global_step] for i in range(1,11)]): # Check if all the previous 10 elements are smaller than the current element
                            print('Training stopped early.')
+                           print(epoch)
                            return train_history, val_history # If so, terminate
                 global_step += 1
         return train_history, val_history

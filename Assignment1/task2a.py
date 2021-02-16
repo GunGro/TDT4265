@@ -32,9 +32,10 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     """
 
 
-    # TODO implement this function (Task 2a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
+
+    #Calculate loss using the provided Equation
     targets = np.array(targets,dtype=np.float)
     cost = -targets*np.log(outputs)-(1-targets)*np.log(1-outputs)
     cost = np.mean(cost)
@@ -69,11 +70,11 @@ class BinaryModel:
             outputs: outputs of model of shape: [batch size, 1]
             targets: labels/targets of each image of shape: [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
         
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
+        #Calculate gradient
         self.grad = -(targets-outputs)*X
         self.grad = np.mean(self.grad, axis = 0, keepdims = True).T
 

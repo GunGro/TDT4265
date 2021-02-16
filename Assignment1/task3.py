@@ -16,6 +16,7 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
     Returns:
         Accuracy (float)
     """
+    # Calculates accuracy
     outputs = model.forward(X)
     accuracy = np.mean(np.sum(targets*outputs, axis = -1) - outputs.max(axis = -1) >= 0.0)
     return accuracy
@@ -35,6 +36,8 @@ class SoftmaxTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
+
+        # Almost the same as previous task, calculates the cross entropy loss for multiple classes using the softmax loss equation provided in the assignment.
         targets = Y_batch
         outputs = self.model.forward(X_batch)
         self.model.backward(X_batch, outputs, targets)
@@ -65,7 +68,7 @@ class SoftmaxTrainer(BaseTrainer):
         return loss, accuracy_train, accuracy_val
 
 def plot_two_weights(model1, model2, save_as = None):
-    fig, ax = plt.subplots(2, 10, gridspec_kw = {'wspace':0, 'hspace':0,'bottom':0.67})
+    fig, ax = plt.subplots(2, 10, gridspec_kw = {'wspace':w0, 'hspace':0,'bottom':0.67})
     for i in range(10):
         ax[0,i].imshow(model1.w[1:,i].reshape((28,28)))
         ax[0,i].axis("off")
@@ -179,6 +182,4 @@ if __name__ == "__main__":
     plt.ylabel("L2-Norm of final Weights")
     plt.xlabel("Lambda Values")
     plt.show()
-
-
-    plt.savefig("task4d_l2_reg_norms.png")
+    plt.savefig("task4e_l2_reg_norms.png")

@@ -4,7 +4,7 @@ import typing
 np.random.seed(1)
 
 
-def pre_process_images(X: np.ndarray):
+def pre_process_images(X: np.ndarray, mu, std):
     """
     Args:
         X: images of shape [batch size, 784] in the range (0, 255)
@@ -13,9 +13,21 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
-    # TODO implement this function (Task 2a)
+
+    X = np.array(X, dtype = np.float64)
+    X = (X - mu)/std
+    X = np.append(X, np.ones((X.shape[0], 1)), axis = 1) #append a one to the end
     return X
 
+
+    return X
+
+def find_mean_std(X: np.ndarray):
+
+    # Takes inn an array which should be the whole training set and returns mu and std
+    std = np.std(X)
+    mu = np.mean(X)
+    return mu, std
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """

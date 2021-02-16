@@ -3,6 +3,9 @@ import utils
 import matplotlib.pyplot as plt
 from task2a import cross_entropy_loss, SoftmaxModel, one_hot_encode, pre_process_images
 from trainer import BaseTrainer
+
+from Assignment2.task2a import find_mean_std
+
 np.random.seed(0)
 
 
@@ -93,11 +96,16 @@ if __name__ == "__main__":
 
     # Load dataset
     X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
-    X_train = pre_process_images(X_train)
-    X_val = pre_process_images(X_val)
+    # Calculate the mean and standard dev from the training set
+    mu, std = find_mean_std(X_train)
+    # Do the pre-processing with normalisation coefficients calculated from trainset
+    X_train = pre_process_images(X_train, mu, std)
+    X_val = pre_process_images(X_val, mu, std)
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)
     # Hyperparameters
+
+
 
     model = SoftmaxModel(
         neurons_per_layer,

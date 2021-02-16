@@ -38,6 +38,7 @@ class SoftmaxModel:
         Returns:
             y: output of model with shape [batch size, num_outputs]
         """
+        # Exact same as before, passing inputs through the network with current weights
         outputs = np.matmul(X,self.w)
         outputs = np.exp(outputs) / np.sum(np.exp(outputs), axis=-1, keepdims=True)
         return outputs
@@ -56,7 +57,7 @@ class SoftmaxModel:
 
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
-
+        # Implements the backward step by calculating model gradient.
         self.grad = np.zeros_like(self.w)
         self.grad = np.einsum('ij,ik->ikj', -(targets-outputs),X)
         self.grad = np.mean(self.grad, axis = 0) + 2*self.l2_reg_lambda*self.w
@@ -78,6 +79,7 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
+    # Implements on hot encoded vectors.
     vec = np.zeros((Y.shape[0],num_classes))
     vec[np.arange(Y.shape[0]), np.array(Y[:,0], dtype = np.int)] = 1.0
     return vec
