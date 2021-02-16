@@ -22,6 +22,19 @@ def pre_process_images(X: np.ndarray, mu, std):
 
     return X
 
+def one_hot_encode(Y: np.ndarray, num_classes: int):
+    """
+    Args:
+        Y: shape [Num examples, 1]
+        num_classes: Number of classes to use for one-hot encoding
+    Returns:
+        Y: shape [Num examples, num classes]
+    """
+    # Implements on hot encoded vectors.
+    vec = np.zeros((Y.shape[0],num_classes))
+    vec[np.arange(Y.shape[0]), np.array(Y[:,0], dtype = np.int)] = 1.0
+    return vec
+
 def find_mean_std(X: np.ndarray):
 
     # Takes inn an array which should be the whole training set and returns mu and std
@@ -110,17 +123,6 @@ class SoftmaxModel:
     def zero_grad(self) -> None:
         self.grads = [None for i in range(len(self.ws))]
 
-
-def one_hot_encode(Y: np.ndarray, num_classes: int):
-    """
-    Args:
-        Y: shape [Num examples, 1]
-        num_classes: Number of classes to use for one-hot encoding
-    Returns:
-        Y: shape [Num examples, num classes]
-    """
-    # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
 
 
 def gradient_approximation_test(
