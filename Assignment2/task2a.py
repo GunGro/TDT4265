@@ -208,6 +208,9 @@ def gradient_approximation_test(
         Details about this test is given in the appendix in the assignment.
     """
     epsilon = 1e-3
+    # Actual gradient
+    logits = model.forward(X)
+    model.backward(X, logits, Y)
     for layer_idx, w in enumerate(model.ws):
         for i in range(w.shape[0]):
             for j in range(w.shape[1]):
@@ -220,9 +223,8 @@ def gradient_approximation_test(
                 cost2 = cross_entropy_loss(Y, logits)
                 gradient_approximation = (cost1 - cost2) / (2 * epsilon)
                 model.ws[layer_idx][i, j] = orig
-                # Actual gradient
-                logits = model.forward(X)
-                model.backward(X, logits, Y)
+                
+                
                 difference = gradient_approximation - \
                     model.grads[layer_idx][i, j]
                 assert abs(difference) <= epsilon**2,\
