@@ -92,6 +92,7 @@ class BaseTrainer:
                                 for i in range(0,10)]):  # Check if all the previous 10 elements are smaller than the current element
                             print('Training stopped early.')
                             print(epoch)
+
                             return train_history, val_history  # If so, terminate
                 global_step += 1
         return train_history, val_history

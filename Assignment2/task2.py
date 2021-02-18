@@ -57,7 +57,7 @@ class SoftmaxTrainer(BaseTrainer):
 
         if self.use_momentum:
             for i in range(len(self.model.ws)):
-                update_grad = self.model.grads[i] + self.model.momentum_gamma*self.previous_grads[i]
+                update_grad = self.model.grads[i] + self.momentum_gamma*self.previous_grads[i]
                 self.model.ws[i] -= self.learning_rate*update_grad
                 self.previous_grads[i] = update_grad
         else:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     # Settings for task 3. Keep all to false for task 2.
     use_improved_sigmoid = True
     use_improved_weight_init = True
-    use_momentum = False
+    use_momentum = True
 
     # Load dataset
     X_train, Y_train, X_val, Y_val = utils.load_full_mnist()

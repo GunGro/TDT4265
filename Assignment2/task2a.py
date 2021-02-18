@@ -1,6 +1,7 @@
 import numpy as np
 import utils
 import typing
+
 import random
 np.random.seed(1)
 
@@ -8,15 +9,17 @@ def sigmoid(Z):
     A = 1 / (1 + np.exp(-Z))
     return A
 
-def improved_sigmoid(Z):
-    A = 1.7159*np.tanh(1.5*Z)
+def improved_sigmoid(X):
+    A = 1.7159*np.tanh(1.5*X)
     return A
 
 def dsigmoid(Z):
     return Z*(1-Z)
 
-def improved_dsigmoid(Z):
-    return (1-Z**2)*(1.5*1.7159)
+def improved_dsigmoid(X):
+    # Z = 1.7159*np.tanh(1.5*X)
+    return (1-((1/1.17159)**2)*X**2)*(1.5*1.7159)
+    #return (2.57385 / (np.cosh(1.5*Z)**2))
 
 def pre_process_images(X: np.ndarray, mu, std):
     """

@@ -13,9 +13,9 @@ if __name__ == "__main__":
     momentum_gamma = .9  # Task 3 hyperparameter
     shuffle_data = True
 
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
-    use_momentum = False
+    use_improved_sigmoid = True
+    use_improved_weight_init = True
+    use_momentum = True
 
     # Load dataset
     X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
