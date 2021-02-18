@@ -8,13 +8,13 @@ def sigmoid(Z):
     return 1 / (1 + np.exp(-Z))
 
 def improved_sigmoid(X):
-    return np.tanh(X)#1.7159*np.tanh((2.0/3)*X)
+    return 1.7159*np.tanh((2.0/3)*X) #np.tanh(X)#
 
 def dsigmoid(Z):
     return Z*(1-Z)
 
 def improved_dsigmoid(Z):
-    return 1-Z**2#(2.0/3)*(1.7159-Z**2/1.7159)
+    return (2.0/3)*(1.7159-Z**2/1.7159) #1-Z**2#
 
 def pre_process_images(X: np.ndarray, mu, std):
     """
