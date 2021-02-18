@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from task2a import cross_entropy_loss, SoftmaxModel, one_hot_encode, pre_process_images
 from trainer import BaseTrainer
 
-from Assignment2.task2a import find_mean_std
+from task2a import find_mean_std
 
 np.random.seed(0)
 

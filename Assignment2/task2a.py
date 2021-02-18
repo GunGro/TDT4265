@@ -2,24 +2,19 @@ import numpy as np
 import utils
 import typing
 
-import random
 np.random.seed(1)
 
 def sigmoid(Z):
-    A = 1 / (1 + np.exp(-Z))
-    return A
+    return 1 / (1 + np.exp(-Z))
 
 def improved_sigmoid(X):
-    A = 1.7159*np.tanh(1.5*X)
-    return A
+    return np.tanh(X)#1.7159*np.tanh((2.0/3)*X)
 
 def dsigmoid(Z):
     return Z*(1-Z)
 
-def improved_dsigmoid(X):
-    # Z = 1.7159*np.tanh(1.5*X)
-    return (1-((1/1.17159)**2)*X**2)*(1.5*1.7159)
-    #return (2.57385 / (np.cosh(1.5*Z)**2))
+def improved_dsigmoid(Z):
+    return 1-Z**2#(2.0/3)*(1.7159-Z**2/1.7159)
 
 def pre_process_images(X: np.ndarray, mu, std):
     """
@@ -134,10 +129,8 @@ class SoftmaxModel:
 
         # Passing from final hidden layer to output layer
         outputs = np.matmul(outputs, self.ws[-1])
-        self.softmax_input = outputs
         # Softmaxing outputlayer
         outputs = np.exp(outputs)/(np.sum(np.exp(outputs), axis=-1, keepdims = True))
-        #print("Hidden layer output:",self.hidden_layer_outputs)
         return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
@@ -172,16 +165,16 @@ class SoftmaxModel:
         self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', delta_k, self.hidden_layer_outputs[-1]),axis=0)
         # get dLoss / dlast_hidden_layer
         delta_j = np.einsum('ij, kj -> ik', delta_k, self.ws[-1])
-        # do the hidden layers
+        # do the hidden layers        
         for i, weights in enumerate(reversed(self.ws[1:-1])):
             z = self.hidden_layer_outputs[-1-i]
-            dact = self.deact(z)
+            dact = self.deact(z) 
             # Find the weight gradient
             self.grads[-2-i] = cal_weights(dact, self.hidden_layer_outputs[-2-i], delta_j )
             # find the loss derivative of hidden layer y to pass backwards
             delta_j = cal_delta(dact, weights, delta_j)
         
-        #do the first layers
+        #do the first hidden layer
         z = self.hidden_layer_outputs[0]
         dact = self.deact(z)
         # Find the weight gradient
