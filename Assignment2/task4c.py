@@ -1,6 +1,6 @@
 import numpy as np
 import utils
-from task2a import one_hot_encode, pre_process_images, SoftmaxModel, gradient_approximation_test
+from task2a import one_hot_encode, pre_process_images, SoftmaxModel, gradient_approximation_test, find_mean_std
 
 
 if __name__ == "__main__":
@@ -11,8 +11,12 @@ if __name__ == "__main__":
     assert Y[0, 3] == 1 and Y.sum() == 1, \
         f"Expected the vector to be [0,0,0,1,0,0,0,0,0,0], but got {Y}"
 
-    X_train, Y_train, *_ = utils.load_full_mnist()
-    X_train = pre_process_images(X_train)
+    # Load dataset
+    X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
+    # Calculate the mean and standard dev from the training set
+    mu, std = find_mean_std(X_train)
+    # Do the pre-processing with normalisation coefficients calculated from trainset
+    X_train = pre_process_images(X_train, mu, std)
     Y_train = one_hot_encode(Y_train, 10)
     assert X_train.shape[1] == 785,\
         f"Expected X_train to have 785 elements per image. Shape was: {X_train.shape}"

@@ -149,16 +149,15 @@ class SoftmaxModel:
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         # calculate the backwards pass across the softmax
-        def cal_weights(dact, y, delta_j):
-            #calculate dz/dw
-            dz_dw = np.einsum("ij, ik -> ijk", y, dact)
-            # return dL/dw
-            return np.mean(delta_j[:,None,:] * dz_dw, axis = 0)
+
+
+        def cal_weights(dact, y, dC_dz):
+            return np.mean(np.einsum("ij,ik->ijk", y, dact*dC_dz), axis=0)
+
+        def cal_delta(dact, weights, dC_dz):
+            return np.einsum("ij,jk->ik", dC_dzdact, weights)
             
-        def cal_delta(dact, weights, delta_j):
-            #calculate dz/dy first
-            dz_dy = (dact[:,None,:]*weights).transpose([0,2,1])
-            return np.einsum("ij, ijk -> ik", delta_j, dz_dy)
+
         
         delta_k = -(targets-outputs)
         # get gradient matrix
@@ -184,21 +183,7 @@ class SoftmaxModel:
             assert grad.shape == w.shape,\
                 f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
 #
-#def backward_pass(self, dL_dz, z, sum_z, y):
-#        if self.type == "softmax":
-#            J_soft = np.eye(z.shape[-1])*z[:,None,:]- np.einsum("...ij,...ik->...ijk",z, z)
-#            return np.einsum("ij,ijk->ik",dL_dz, J_soft), None, None
-#        else:
-#            dz_dsum = self.dact(sum_z, z)
-#            #make the dL_dw matrix
-#            dz_dw = np.einsum("ij, ik -> ijk",y, dz_dsum)
-#            dL_dw = np.mean(dL_dz[:,None,:] * dz_dw, axis = 0)
-#            #make the dL_dB vector
-#            dL_dB = np.mean(dL_dz * dz_dsum, axis = 0)     
-#            #make the dL_dy
-#            dz_dy = (dz_dsum[:,None,:]*self.weights).transpose([0,2,1])
-#            dL_dy = np.einsum("ij, ijk->ik",dL_dz, dz_dy)
-#            return dL_dy, dL_dw, dL_dB
+
 
 
 def gradient_approximation_test(
@@ -208,8 +193,12 @@ def gradient_approximation_test(
         Details about this test is given in the appendix in the assignment.
     """
     epsilon = 1e-3
+    logits = model.forward(X)
+    model.backward(X, logits, Y)
     for layer_idx, w in enumerate(model.ws):
+        print("Layer idx:",layer_idx)
         for i in range(w.shape[0]):
+            print("W_index:", i)
             for j in range(w.shape[1]):
                 orig = model.ws[layer_idx][i, j].copy()
                 model.ws[layer_idx][i, j] = orig + epsilon
@@ -221,8 +210,7 @@ def gradient_approximation_test(
                 gradient_approximation = (cost1 - cost2) / (2 * epsilon)
                 model.ws[layer_idx][i, j] = orig
                 # Actual gradient
-                logits = model.forward(X)
-                model.backward(X, logits, Y)
+
                 difference = gradient_approximation - \
                     model.grads[layer_idx][i, j]
                 assert abs(difference) <= epsilon**2,\
