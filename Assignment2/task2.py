@@ -101,7 +101,8 @@ if __name__ == "__main__":
     batch_size = 32
     neurons_per_layer = [64,  10]
     momentum_gamma = .9  # Task 3 hyperparameter
-    shuffle_data = True
+    shuffle_data =
+
 
     # Settings for task 3. Keep all to false for task 2.
     use_improved_sigmoid = True
