@@ -151,7 +151,7 @@ class SoftmaxModel:
         # calculate the backwards pass across the softmax
 
 
-        def cal_weights(dact, y, dC_dz):
+        def cal_weights_grad(dact, y, dC_dz):
             return np.mean(np.einsum("ij,ik->ijk", y, dact*dC_dz), axis=0)
 
         def cal_delta(dact, weights, dC_dz):
@@ -159,25 +159,25 @@ class SoftmaxModel:
             
 
         
-        delta_k = -(targets-outputs)
+        delta = -(targets-outputs)
         # get gradient matrix
-        self.grads[-1] = np.mean(np.einsum('ij,ik->ikj', delta_k, self.hidden_layer_outputs[-1]),axis=0)
+        self.grads[-1] = np.mean(np.einsum('ij,ik->ijk', self.hidden_layer_outputs[-1],delta),axis=0)
         # get dLoss / dlast_hidden_layer
-        delta_j = np.einsum('ij, kj -> ik', delta_k, self.ws[-1])
+        delta = np.einsum('ij, kj -> ik', delta, self.ws[-1])
         # do the hidden layers        
         for i, weights in enumerate(reversed(self.ws[1:-1])):
             z = self.hidden_layer_outputs[-1-i]
             dact = self.deact(z) 
             # Find the weight gradient
-            self.grads[-2-i] = cal_weights(dact, self.hidden_layer_outputs[-2-i], delta_j )
+            self.grads[-2-i] = cal_weights_grad(dact, self.hidden_layer_outputs[-2-i], delta )
             # find the loss derivative of hidden layer y to pass backwards
-            delta_j = cal_delta(dact, weights, delta_j)
+            delta = cal_delta(dact, weights, delta)
         
         #do the first hidden layer
         z = self.hidden_layer_outputs[0]
         dact = self.deact(z)
         # Find the weight gradient
-        self.grads[0] = cal_weights(dact, X, delta_j )
+        self.grads[0] = cal_weights_grad(dact, X, delta )
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
@@ -193,12 +193,11 @@ def gradient_approximation_test(
         Details about this test is given in the appendix in the assignment.
     """
     epsilon = 1e-3
+    # Actual gradient
     logits = model.forward(X)
     model.backward(X, logits, Y)
     for layer_idx, w in enumerate(model.ws):
-        print("Layer idx:",layer_idx)
         for i in range(w.shape[0]):
-            print("W_index:", i)
             for j in range(w.shape[1]):
                 orig = model.ws[layer_idx][i, j].copy()
                 model.ws[layer_idx][i, j] = orig + epsilon
@@ -209,7 +208,6 @@ def gradient_approximation_test(
                 cost2 = cross_entropy_loss(Y, logits)
                 gradient_approximation = (cost1 - cost2) / (2 * epsilon)
                 model.ws[layer_idx][i, j] = orig
-                # Actual gradient
 
                 difference = gradient_approximation - \
                     model.grads[layer_idx][i, j]
