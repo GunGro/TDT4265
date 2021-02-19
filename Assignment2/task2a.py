@@ -155,7 +155,7 @@ class SoftmaxModel:
             return np.mean(np.einsum("ij,ik->ijk", y, dact*dC_dz), axis=0)
 
         def cal_delta(dact, weights, dC_dz):
-            return np.einsum("ij,jk->ik", dC_dz*dact, weights)
+            return np.einsum("ij,kj->ik", dC_dz*dact, weights)
             
 
         
