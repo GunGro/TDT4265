@@ -39,11 +39,11 @@ if __name__ == "__main__":
     train_history, val_history = trainer.train(num_epochs)
 
     # Comparing the two networks with one 64 wide hidden layers and one with 10 64 wide hidden layers
-    # for runtime reasons the deeper network is only trained with 5 epochs.
+    # for runtime reasons the deeper network is only trained with 5 epochs. JK we have gaming compputers
 
     neurons_per_layer = [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 10]
     num_epochs = 50
-    learning_rate = 0.002
+    learning_rate = 0.02
 
     model_ten_layers = SoftmaxModel(
         neurons_per_layer,
@@ -56,8 +56,7 @@ if __name__ == "__main__":
     )
     train_history_no_shuffle, val_history_no_shuffle = trainer_shuffle.train(
         num_epochs)
-    shuffle_data = True
-
+    plt.figure(figsize=(15,10))
     plt.subplot(1, 2, 1)
     utils.plot_loss(train_history["loss"],
                     "Task 3c model", npoints_to_average=10)
@@ -65,7 +64,7 @@ if __name__ == "__main__":
         train_history_no_shuffle["loss"], "Task 4e model", npoints_to_average=10)
     plt.ylim([0, .4])
     plt.subplot(1, 2, 2)
-    plt.ylim([0.85, .95])
+    plt.ylim([0.85, 1])
     utils.plot_loss(val_history["accuracy"], "Task 3c model")
     utils.plot_loss(
         val_history_no_shuffle["accuracy"], "Task 4e model")
