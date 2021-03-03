@@ -41,8 +41,9 @@ def compute_loss_and_accuracy(
             # Computing the loss
             batch_loss = loss_criterion(output_probs, Y_batch)
             total_loss += batch_loss
+            num_batches += 1
     accuracy = correct / total
-    average_loss = total_loss / total
+    average_loss = total_loss / num_batches
     return average_loss, accuracy
 
 
