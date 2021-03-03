@@ -1,6 +1,7 @@
 import pathlib
 import matplotlib.pyplot as plt
 import utils
+import torch.nn.functional as F
 from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
@@ -18,10 +19,22 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        # TODO: Implement this function (Task  2a)
         num_filters = 32  # Set number of filters in first conv layer
+
+        self.conv1 = nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
+        self.pool1 = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(image_channels, num_filters*2, kernel_size=5,stride=1,padding=2)
+        self.pool2 = nn.MaxPool2d(2, 2)
+        self.conv3 = nn.Conv2d(image_channels, num_filters*4, kernel_size=5,stride=1,padding=2)
+        self.pool3 = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(128, 60)
+        self.fc2 = nn.Linear(60, 10)
+
+
+        # TODO: Implement this function (Task  2a)
         self.num_classes = num_classes
         # Define the convolutional layers
+        """
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(
                 in_channels=image_channels,
@@ -31,6 +44,9 @@ class ExampleModel(nn.Module):
                 padding=2
             )
         )
+        """
+        #torch.nn.Conv2d(in_channels: int, out_channels: int, kernel_size: Union[T, Tuple[T, T]], stride: Union[T, Tuple[T, T]] = 1, padding: Union[T, Tuple[T, T]] = 0
+
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
         self.num_output_features = 32*32*32
         # Initialize our last fully connected layer
@@ -48,8 +64,20 @@ class ExampleModel(nn.Module):
         Args:
             x: Input image, shape: [batch_size, 3, 32, 32]
         """
-        # TODO: Implement this function (Task  2a)
         batch_size = x.shape[0]
+
+        # Convolutional layers and maxpooling
+        x = self.pool1(F.relu(self.conv1(x)))
+        x = self.pool2(F.relu(self.conv2(x)))
+        x = self.pool3(F.relu(self.conv3(x)))
+
+        # Flatten
+        x = x.view(x.size(0), -1)
+
+        # Linear layer
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+
         out = x
         expected_shape = (batch_size, self.num_classes)
         assert out.shape == (batch_size, self.num_classes),\
