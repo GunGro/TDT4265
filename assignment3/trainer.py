@@ -180,7 +180,6 @@ class Trainer:
                 self.global_step += 1
                 # Compute loss/accuracy for validation set
                 if should_validate_model():
-                    print('Hei')
                     self.validation_step()
                     self.save_model()
                     if self.should_early_stop():

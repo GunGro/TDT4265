@@ -119,6 +119,5 @@ if __name__ == "__main__":
         model,
         dataloaders
     )
-    print('Hei')
     trainer.train()
     create_plots(trainer, "task2")
