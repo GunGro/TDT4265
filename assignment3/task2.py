@@ -23,11 +23,11 @@ class ExampleModel(nn.Module):
 
         self.conv1 = nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
         self.pool1 = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(image_channels, num_filters*2, kernel_size=5,stride=1,padding=2)
+        self.conv2 = nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
         self.pool2 = nn.MaxPool2d(2, 2)
-        self.conv3 = nn.Conv2d(image_channels, num_filters*4, kernel_size=5,stride=1,padding=2)
+        self.conv3 = nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
         self.pool3 = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(128, 60)
+        self.fc1 = nn.Linear(num_filters**2*2, 60)
         self.fc2 = nn.Linear(60, 10)
 
 
@@ -54,9 +54,7 @@ class ExampleModel(nn.Module):
         # Outputs num_classes predictions, 1 for each class.
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
-        self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, num_classes),
-        )
+
 
     def forward(self, x):
         """
@@ -76,7 +74,7 @@ class ExampleModel(nn.Module):
 
         # Linear layer
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = self.fc2(x)
 
         out = x
         expected_shape = (batch_size, self.num_classes)
@@ -121,5 +119,6 @@ if __name__ == "__main__":
         model,
         dataloaders
     )
+    print('Hei')
     trainer.train()
     create_plots(trainer, "task2")

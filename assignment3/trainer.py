@@ -39,7 +39,7 @@ def compute_loss_and_accuracy(
             correct += (predicted == Y_batch).sum().item()
             total += X_batch.size(0)
             # Computing the loss
-            batch_loss = loss_criterion(predicted, Y_batch)
+            batch_loss = loss_criterion(output_probs, Y_batch)
             total_loss += batch_loss
     accuracy = correct / total
     average_loss = total_loss / total
@@ -179,6 +179,7 @@ class Trainer:
                 self.global_step += 1
                 # Compute loss/accuracy for validation set
                 if should_validate_model():
+                    print('Hei')
                     self.validation_step()
                     self.save_model()
                     if self.should_early_stop():
