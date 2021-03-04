@@ -5,13 +5,13 @@ import torchvision
 import torch
 import numpy as np
 image = Image.open("images/zebra.jpg")
-print("Image shape:", image.size)
+#print("Image shape:", image.size)
 
 model = torchvision.models.resnet18(pretrained=True)
-print(model)
+#print(model)
 first_conv_layer = model.conv1
-print("First conv layer weight shape:", first_conv_layer.weight.shape)
-print("First conv layer:", first_conv_layer)
+#print("First conv layer weight shape:", first_conv_layer.weight.shape)
+#print("First conv layer:", first_conv_layer)
 
 # Resize, and normalize the image with the mean and standard deviation
 image_transform = torchvision.transforms.Compose([
@@ -20,10 +20,10 @@ image_transform = torchvision.transforms.Compose([
     torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 image = image_transform(image)[None]
-print("Image shape:", image.shape)
+#print("Image shape:", image.shape)
 
 activation = first_conv_layer(image)
-print("Activation shape:", activation.shape)
+#print("Activation shape:", activation.shape)
 
 
 def torch_image_to_numpy(image: torch.Tensor):
@@ -46,20 +46,30 @@ def torch_image_to_numpy(image: torch.Tensor):
     return image
 
 
-def create_filter_images(image, model, indices):
+def create_filter_images(image, model, indices, save_as = None):
     with torch.no_grad():
         transformed = model.forward(image)
         
-        n = len(indices)
-        for i, index in enumerate( indices):
-            plt.subplot(1,n,i+1)
-            plt.yticks([])
-            plt.xticks([])
-            plt.imshow(transformed[0,index,:,:])
-        plt.savefig("transformed_zebras.pdf")
-        plt.show()
+        plot_many(transformed, indices)
+
+def plot_many(figures,indices, save_as = None ):
+    n = len(indices)
+    for i, index in enumerate( indices):
+        plt.subplot(1,n,i+1)
+        plt.yticks([])
+        plt.xticks([])
+        plt.imshow(figures[0,index,:,:])
+    if save_as:
+        plt.savefig(save_as)
+    plt.show()
 
 
 if __name__ == "__main__":
     indices = [14, 26, 32, 49, 52]
     create_filter_images(image,first_conv_layer,indices)
+    
+    with torch.no_grad():
+        for child in list(model.children())[:-2]:
+            image = child(image)
+            
+    plot_many(image, list(range(10)), save_as="pixel_art.pdf" )
