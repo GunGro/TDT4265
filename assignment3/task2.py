@@ -22,10 +22,13 @@ class ExampleModel(nn.Module):
         num_filters = 32  # Set number of filters in first conv layer
 
         self.conv1 = nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
+        self.conv12 = nn.Conv2d(num_filters, num_filters, kernel_size=5,stride=1,padding=2)
         self.pool1 = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
+        self.conv22 = nn.Conv2d(num_filters*2, num_filters*2, kernel_size=5,stride=1,padding=2)
         self.pool2 = nn.MaxPool2d(2, 2)
         self.conv3 = nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
+        self.conv32 = nn.Conv2d(num_filters*4, num_filters*4, kernel_size=5,stride=1,padding=2)
         self.pool3 = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(num_filters**2*2, 60)
         self.fc2 = nn.Linear(60, 10)
@@ -65,9 +68,12 @@ class ExampleModel(nn.Module):
         batch_size = x.shape[0]
 
         # Convolutional layers and maxpooling
-        x = self.pool1(F.relu(self.conv1(x)))
-        x = self.pool2(F.relu(self.conv2(x)))
-        x = self.pool3(F.relu(self.conv3(x)))
+        x = self.conv1(x)
+        x = self.pool1(F.relu(self.conv12(x)))
+        x = self.conv2(x)
+        x = self.pool2(F.relu(self.conv22(x)))
+        x = self.conv3(x)
+        x = self.pool3(F.relu(self.conv32(x)))
 
         # Flatten
         x = x.view(x.size(0), -1)
@@ -122,3 +128,18 @@ if __name__ == "__main__":
     print('Hei')
     trainer.train()
     create_plots(trainer, "task2")
+    # Calculate validation loss and accuracy
+    validation_loss, validation_acc = compute_loss_and_accuracy(
+        trainer.dataloader_val, trainer.model, trainer.loss_criterion
+    )
+    # Calculate training loss and accuracy
+    train_loss, train_acc = compute_loss_and_accuracy(
+        trainer.dataloader_train, trainer.model, trainer.loss_criterion
+    )
+    # Calculate test loss and accuracy
+    test_loss, test_acc = compute_loss_and_accuracy(
+        trainer.dataloader_test, trainer.model, trainer.loss_criterion
+    )
+    print('Training accuracy and loss was:',train_acc,' and ', train_loss)
+    print('Validation accuracy and loss was:',validation_acc,' and ', validation_loss)
+    print('Test accuracy and loss was:', test_acc, ' and ', test_loss)
