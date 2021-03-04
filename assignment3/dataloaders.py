@@ -5,9 +5,11 @@ import typing
 import numpy as np
 np.random.seed(0)
 
-mean = (0.5, 0.5, 0.5)
-std = (.25, .25, .25)
+#mean = (0.5, 0.5, 0.5)
+#std = (.25, .25, .25)
 
+mean=(0.485, 0.456, 0.406)
+std=(0.229, 0.224, 0.225)
 
 def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                  ) -> typing.List[torch.utils.data.DataLoader]:
@@ -16,10 +18,12 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
     transform_train = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
+        transforms.Resize(224),
     ])
     transform_test = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize(mean, std)
+        transforms.Normalize(mean, std),
+        transforms.Resize(224),
     ])
     data_train = datasets.CIFAR10('data/cifar10',
                                   train=True,
