@@ -19,44 +19,46 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        num_filters = 128  # Set number of filters in first conv layer
+        num_filters = 32  # Set number of filters in first conv layer
           # ,nn.BatchNorm2d(num_filters)
           # ,nn.ReLU()
 
         self.conv_layers = nn.Sequential(
-           nn.Conv2d(image_channels, num_filters, kernel_size=11,stride=1,padding=2)
+           nn.Conv2d(image_channels, num_filters, kernel_size=3,stride=1,padding=1)
           ,nn.ReLU()
-          ,nn.MaxPool2d(3, 2)
           ,nn.BatchNorm2d(num_filters)
-          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
+          ,nn.Conv2d(num_filters, num_filters, kernel_size=3,stride=1,padding=1)
           ,nn.ReLU()
-          ,nn.MaxPool2d(3, 2)
+          ,nn.BatchNorm2d(num_filters)
+          ,nn.MaxPool2d(2, 2)
+          ,nn.Dropout2d(0.1)
+          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=3,stride=1,padding=1)
+          ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters*2)
+          ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=3,stride=1,padding=1)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*2)
+          ,nn.MaxPool2d(2, 2)
+          ,nn.Dropout2d(0.2)
           ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=3,stride=1,padding=1)
           ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*4)
+          ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=3,stride=1,padding=1)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*4)
           ,nn.MaxPool2d(2, 2)
+          ,nn.Dropout2d(0.3)
         )
         self.linear_layers = nn.Sequential(
-            nn.Linear(2048, 100)
+             nn.Flatten()
+            ,nn.Linear(2048, 100)
             ,nn.ReLU()
             ,nn.Linear(100, 10)
         )
-
-
-        # TODO: Implement this function (Task  2a)
         self.num_classes = num_classes
-        # Define the convolutional layers
 
 
-        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 32*32*32
-        # Initialize our last fully connected layer
-        # Inputs all extracted features from the convolutional layers
-        # Outputs num_classes predictions, 1 for each class.
-        # There is no need for softmax activation function, as this is
-        # included with nn.CrossEntropyLoss
-
-
+      
     def forward(self, x):
         """
         Performs a forward pass through the model
@@ -66,10 +68,6 @@ class ExampleModel(nn.Module):
         batch_size = x.shape[0]
         # Convolutional layers and maxpooling
         x = self.conv_layers(x)
-
-        # Flatten
-        x = x.view(x.size(0), -1)
-
         # Linear layer
         x = self.linear_layers(x)
 
