@@ -21,41 +21,44 @@ class ExampleModel(nn.Module):
         """
         super().__init__()
         num_filters = 32  # Set number of filters in first conv layer
-          # ,nn.BatchNorm2d(num_filters)
-          # ,nn.ReLU()
 
         self.conv_layers = nn.Sequential(
-           nn.Conv2d(image_channels, num_filters, kernel_size=3,stride=1,padding=1)
+           nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
           ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters)
-          ,nn.Conv2d(num_filters, num_filters, kernel_size=3,stride=1,padding=1)
+          ,nn.Conv2d(num_filters, num_filters, kernel_size=5,stride=1,padding=2)
           ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters)
           ,nn.MaxPool2d(2, 2)
-          ,nn.Dropout2d(0.1)
-          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=3,stride=1,padding=1)
+          
+          
+          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
           ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters*2)
-          ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=3,stride=1,padding=1)
+          ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=5,stride=1,padding=2)
           ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters*2)
           ,nn.MaxPool2d(2, 2)
-          ,nn.Dropout2d(0.2)
-          ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=3,stride=1,padding=1)
+          
+          
+          ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
           ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters*4)
-          ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=3,stride=1,padding=1)
+          ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=5,stride=1,padding=2)
           ,nn.ReLU()
           ,nn.BatchNorm2d(num_filters*4)
           ,nn.MaxPool2d(2, 2)
-          ,nn.Dropout2d(0.3)
+          
+          
+          
         )
         self.linear_layers = nn.Sequential(
              nn.Flatten()
-            ,nn.Linear(2048, 100)
+            ,nn.Linear(num_filters*4*4*4, 60)
             ,nn.ReLU()
-            ,nn.Linear(100, 10)
+            ,nn.Linear(60, 10)
         )
+
         self.num_classes = num_classes
 
 
@@ -118,11 +121,11 @@ if __name__ == "__main__":
     # You can try to change this and check if you still get the same result! 
     utils.set_seed(0)
     epochs = 10
-    batch_size = 32
-    learning_rate = 5e-4
+    batch_size = 64
+    learning_rate = 5e-2
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = Model(num_classes=10)
+    model = ExampleModel(image_channels=3,num_classes=10)#Model(num_classes=10)
     trainer = Trainer(
         batch_size,
         learning_rate,
@@ -132,7 +135,7 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
-    create_plots(trainer, "task2")
+    create_plots(trainer, "task3_best")
     # Calculate validation loss and accuracy
     validation_loss, validation_acc = compute_loss_and_accuracy(
         trainer.dataloader_val, trainer.model, trainer.loss_criterion

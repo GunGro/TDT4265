@@ -73,15 +73,16 @@ class Trainer:
         print(self.model)
 
         # Define our optimizer. SGD = Stochastich Gradient Descent
-        #self.optimizer = torch.optim.SGD(self.model.parameters(),
-        #                                 self.learning_rate
-        #                                 ,momentum = 0.1
-        #                                ,weight_decay= 0.005)
-        self.optimizer = torch.optim.Adam(self.model.parameters(),
-                                          self.learning_rate
-                                          ,betas=(0.9, 0.999)
-                                          ,eps=1e-08
-                                          , amsgrad=False)
+        self.optimizer = torch.optim.SGD(self.model.parameters(),
+                                        self.learning_rate
+                                        ,momentum = 0.1
+                                        ,weight_decay=0.005)
+        # The adam optimizer task 41
+        # self.optimizer = torch.optim.Adam(self.model.parameters(),
+        #                                   self.learning_rate
+        #                                   ,betas=(0.9, 0.999)
+        #                                   ,eps=1e-08
+        #                                   , amsgrad=False)
         # Load our dataset
         self.dataloader_train, self.dataloader_val, self.dataloader_test = dataloaders
 

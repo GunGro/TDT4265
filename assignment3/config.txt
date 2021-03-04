@@ -1,69 +1,78 @@
 (conv relu conv relu pool) * 3
 
-        self.conv_layers = nn.Sequential(
-            nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
-          ,nn.ReLU()
-          ,nn.Conv2d(num_filters, num_filters, kernel_size=5,stride=1,padding=2)
-          ,nn.ReLU()
-          ,nn.MaxPool2d(2, 2)
-          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
-          ,nn.ReLU()
-          ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=5,stride=1,padding=2)
-          ,nn.ReLU()
-          ,nn.MaxPool2d(2, 2)
-          ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
-          ,nn.ReLU()
-          ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=5,stride=1,padding=2)
-          ,nn.ReLU()
-          ,nn.MaxPool2d(2, 2)
-        )
-        self.linear_layers = nn.Sequential(
-            nn.Linear(num_filters**2*2, 60)
-            ,nn.ReLU()
-            ,nn.Linear(60, 10)
-            ,nn.ReLU()
-        )
-
-
-
-Training accuracy and loss was: 0.8571968349928877  and  tensor(0.4154, device='cuda:0')
-Validation accuracy and loss was: 0.7598  and  tensor(0.7926, device='cuda:0')
-Test accuracy and loss was: 0.7553  and  tensor(0.8048, device='cuda:0')
-
-
-with batchnorms: 
+        num_filters = 64  # Set number of filters in first conv layer
 
 
         self.conv_layers = nn.Sequential(
            nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
-          ,nn.BatchNorm2d(num_filters)
           ,nn.ReLU()
           ,nn.Conv2d(num_filters, num_filters, kernel_size=5,stride=1,padding=2)
-          ,nn.BatchNorm2d(num_filters)
           ,nn.ReLU()
           ,nn.MaxPool2d(2, 2)
           ,nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
-          ,nn.BatchNorm2d(num_filters*2)
           ,nn.ReLU()
           ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=5,stride=1,padding=2)
-          ,nn.BatchNorm2d(num_filters*2)
           ,nn.ReLU()
           ,nn.MaxPool2d(2, 2)
           ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
-          ,nn.BatchNorm2d(num_filters*4)
           ,nn.ReLU()
           ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=5,stride=1,padding=2)
-          ,nn.BatchNorm2d(num_filters*4)
           ,nn.ReLU()
           ,nn.MaxPool2d(2, 2)
         )
         self.linear_layers = nn.Sequential(
-            nn.Linear(num_filters**2*2, 60)
+             nn.Flatten()
+            ,nn.Linear(num_filters*4*4*4, 60)
             ,nn.ReLU()
             ,nn.Linear(60, 10)
-            ,nn.ReLU()
         )
 
-Training accuracy and loss was: 0.8814900426742532  and  tensor(0.3495, device='cuda:0')
-Validation accuracy and loss was: 0.798  and  tensor(0.6098, device='cuda:0')
-Test accuracy and loss was: 0.8009  and  tensor(0.6095, device='cuda:0')
+
+Training accuracy and loss was: 0.9323213015647226  and  tensor(0.1959, device='cuda:0')
+Validation accuracy and loss was: 0.7622  and  tensor(0.8443, device='cuda:0')
+Test accuracy and loss was: 0.7585  and  tensor(0.8545, device='cuda:0')
+
+with batchnorms and L2-reg of 0.005: 
+
+       num_filters = 32  # Set number of filters in first conv layer
+
+       self.conv_layers = nn.Sequential(
+           nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters)
+          ,nn.Conv2d(num_filters, num_filters, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters)
+          ,nn.MaxPool2d(2, 2)
+          
+          
+          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*2)
+          ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*2)
+          ,nn.MaxPool2d(2, 2)
+          
+          
+          ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*4)
+          ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.BatchNorm2d(num_filters*4)
+          ,nn.MaxPool2d(2, 2)
+          
+          
+          
+        )
+        self.linear_layers = nn.Sequential(
+             nn.Flatten()
+            ,nn.Linear(num_filters*4*4*4, 60)
+            ,nn.ReLU()
+            ,nn.Linear(60, 10)
+        )
+
+Training accuracy and loss was: 0.9299431009957326  and  tensor(0.2118, device='cuda:0')
+Validation accuracy and loss was: 0.8066  and  tensor(0.5737, device='cuda:0')
+Test accuracy and loss was: 0.8102  and  tensor(0.5843, device='cuda:0')

@@ -50,7 +50,7 @@ def create_filter_images(image, model, indices, save_as = None):
     with torch.no_grad():
         transformed = model.forward(image)
         
-        plot_many(transformed, indices)
+        plot_many(transformed, indices, save_as = save_as)
 
 def plot_many(figures,indices, save_as = None ):
     n = len(indices)
@@ -60,13 +60,15 @@ def plot_many(figures,indices, save_as = None ):
         plt.xticks([])
         plt.imshow(figures[0,index,:,:])
     if save_as:
-        plt.savefig(save_as)
+        plt.subplots_adjust( wspace = 0.01)
+        plt.savefig(save_as, bbox_inches = 'tight',
+                    pad_inches = 0.0)
     plt.show()
 
 
 if __name__ == "__main__":
     indices = [14, 26, 32, 49, 52]
-    create_filter_images(image,first_conv_layer,indices)
+    create_filter_images(image,first_conv_layer,indices, save_as="transformed_zebras.pdf")
     
     with torch.no_grad():
         for child in list(model.children())[:-2]:
