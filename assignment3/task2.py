@@ -2,9 +2,10 @@ import pathlib
 import matplotlib.pyplot as plt
 import utils
 import torch.nn.functional as F
-from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
+import torchvision
+from torch import nn
 
 
 class ExampleModel(nn.Module):
@@ -78,6 +79,22 @@ class ExampleModel(nn.Module):
         return out
 
 
+class Model(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = torchvision.models.resnet18(pretrained=True)
+        self.model.fc = nn.Linear(512, num_classes) # No need to apply softmax,
+            # as this is done in nn.CrossEntropyLoss
+        for param in self.model.parameters(): # Freeze all parameters
+            param.requires_grad = False
+        for param in self.model.fc.parameters(): # Unfreeze the last fully-connected
+            param.requires_grad = True # layer
+        for param in self.model.layer4.parameters(): # Unfreeze the last 5 convolutional
+            param.requires_grad = True # layers
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
 def create_plots(trainer: Trainer, name: str):
     plot_path = pathlib.Path("plots")
     plot_path.mkdir(exist_ok=True)
@@ -102,10 +119,10 @@ if __name__ == "__main__":
     utils.set_seed(0)
     epochs = 10
     batch_size = 64
-    learning_rate = 5e-2
+    learning_rate = 5e-4
     early_stop_count = 10
     dataloaders = load_cifar10(batch_size)
-    model = ExampleModel(image_channels=3, num_classes=10)
+    model = Model(num_classes=10)
     trainer = Trainer(
         batch_size,
         learning_rate,
