@@ -46,4 +46,20 @@ def torch_image_to_numpy(image: torch.Tensor):
     return image
 
 
-indices = [14, 26, 32, 49, 52]
+def create_filter_images(image, model, indices):
+    with torch.no_grad():
+        transformed = model.forward(image)
+        
+        n = len(indices)
+        for i, index in enumerate( indices):
+            plt.subplot(1,n,i+1)
+            plt.yticks([])
+            plt.xticks([])
+            plt.imshow(transformed[0,index,:,:])
+        plt.savefig("transformed_zebras.pdf")
+        plt.show()
+
+
+if __name__ == "__main__":
+    indices = [14, 26, 32, 49, 52]
+    create_filter_images(image,first_conv_layer,indices)

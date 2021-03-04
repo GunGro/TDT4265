@@ -118,9 +118,9 @@ if __name__ == "__main__":
     # You can try to change this and check if you still get the same result! 
     utils.set_seed(0)
     epochs = 10
-    batch_size = 64
+    batch_size = 32
     learning_rate = 5e-4
-    early_stop_count = 10
+    early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
     model = Model(num_classes=10)
     trainer = Trainer(

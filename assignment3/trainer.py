@@ -81,7 +81,6 @@ class Trainer:
                                           self.learning_rate
                                           ,betas=(0.9, 0.999)
                                           ,eps=1e-08
-                                          ,weight_decay=0.005
                                           , amsgrad=False)
         # Load our dataset
         self.dataloader_train, self.dataloader_val, self.dataloader_test = dataloaders
