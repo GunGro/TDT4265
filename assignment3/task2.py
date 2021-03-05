@@ -20,7 +20,7 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        num_filters = 64  # Set number of filters in first conv layer
+        num_filters = 32  # Set number of filters in first conv layer
 
 
         self.conv_layers = nn.Sequential(
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
     model = ExampleModel(image_channels=3,num_classes=10)#Model(num_classes=10)
-    model2 = ExampleModel2(image_channels=3,num_classes=10)
+    # model2 = ExampleModel2(image_channels=3,num_classes=10)
     trainer = Trainer(
         batch_size,
         learning_rate,
@@ -206,30 +206,30 @@ if __name__ == "__main__":
         model,
         dataloaders
     )
-    trainer2 = Trainer(
-        batch_size,
-        learning_rate,
-        early_stop_count,
-        epochs,
-        model2,
-        dataloaders
-    )
+    # trainer2 = Trainer(
+    #     batch_size,
+    #     learning_rate,
+    #     early_stop_count,
+    #     epochs,
+    #     model2,
+    #     dataloaders
+    # )
     trainer.train()
-    trainer2.train()
-    create_improvement_plot(trainer2, trainer, name = "task3_vs")
-    # #create_plots(trainer, "task3_best")
-    # # Calculate validation loss and accuracy
-    # validation_loss, validation_acc = compute_loss_and_accuracy(
-    #     trainer.dataloader_val, trainer.model, trainer.loss_criterion
-    # )
-    # # Calculate training loss and accuracy
-    # train_loss, train_acc = compute_loss_and_accuracy(
-    #     trainer.dataloader_train, trainer.model, trainer.loss_criterion
-    # )
-    # # Calculate test loss and accuracy
-    # test_loss, test_acc = compute_loss_and_accuracy(
-    #     trainer.dataloader_test, trainer.model, trainer.loss_criterion
-    # )
-    # print('Training accuracy and loss was:',train_acc,' and ', train_loss)
-    # print('Validation accuracy and loss was:',validation_acc,' and ', validation_loss)
-    # print('Test accuracy and loss was:', test_acc, ' and ', test_loss)
+    # trainer2.train()
+    # create_improvement_plot(trainer2, trainer, name = "task3_vs")
+    create_plots(trainer, "task3_best")
+    # Calculate validation loss and accuracy
+    validation_loss, validation_acc = compute_loss_and_accuracy(
+        trainer.dataloader_val, trainer.model, trainer.loss_criterion
+    )
+    # Calculate training loss and accuracy
+    train_loss, train_acc = compute_loss_and_accuracy(
+        trainer.dataloader_train, trainer.model, trainer.loss_criterion
+    )
+    # Calculate test loss and accuracy
+    test_loss, test_acc = compute_loss_and_accuracy(
+        trainer.dataloader_test, trainer.model, trainer.loss_criterion
+    )
+    print('Training accuracy and loss was:',train_acc,' and ', train_loss)
+    print('Validation accuracy and loss was:',validation_acc,' and ', validation_loss)
+    print('Test accuracy and loss was:', test_acc, ' and ', test_loss)
