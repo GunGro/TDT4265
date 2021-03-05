@@ -217,13 +217,13 @@ if __name__ == "__main__":
     trainer.train()
     # trainer2.train()
     # create_improvement_plot(trainer2, trainer, name = "task3_vs")
-    create_plots(trainer, "task3_best")
+    create_plots(trainer, "None")
     # Calculate validation loss and accuracy
     validation_loss, validation_acc = compute_loss_and_accuracy(
         trainer.dataloader_val, trainer.model, trainer.loss_criterion
     )
     # Calculate training loss and accuracy
-    train_loss, train_acc = compute_loss_and_accuracy(
+    train_loss, train_acc = compute_loss_and_accuracy( 
         trainer.dataloader_train, trainer.model, trainer.loss_criterion
     )
     # Calculate test loss and accuracy
