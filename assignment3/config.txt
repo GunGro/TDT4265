@@ -76,3 +76,9 @@ with batchnorms and L2-reg of 0.005:
 Training accuracy and loss was: 0.9299431009957326  and  tensor(0.2118, device='cuda:0')
 Validation accuracy and loss was: 0.8066  and  tensor(0.5737, device='cuda:0')
 Test accuracy and loss was: 0.8102  and  tensor(0.5843, device='cuda:0')
+
+without regularizing 
+
+ Training accuracy and loss was: 0.9277427098150782  and  tensor(0.2095, device='cuda:0')
+Validation accuracy and loss was: 0.793  and  tensor(0.6889, device='cuda:0')
+Test accuracy and loss was: 0.7937  and  tensor(0.6907, device='cuda:0')

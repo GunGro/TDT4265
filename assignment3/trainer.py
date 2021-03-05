@@ -76,7 +76,8 @@ class Trainer:
         self.optimizer = torch.optim.SGD(self.model.parameters(),
                                         self.learning_rate
                                         ,momentum = 0.1
-                                        ,weight_decay=0.005)
+                                        #,weight_decay=0.005
+                                        )
         # The adam optimizer task 41
         # self.optimizer = torch.optim.Adam(self.model.parameters(),
         #                                   self.learning_rate
