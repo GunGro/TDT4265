@@ -20,6 +20,68 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
+        num_filters = 64  # Set number of filters in first conv layer
+
+
+        self.conv_layers = nn.Sequential(
+           nn.Conv2d(image_channels, num_filters, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.Conv2d(num_filters, num_filters, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.MaxPool2d(2, 2)
+          ,nn.Conv2d(num_filters, num_filters*2, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.Conv2d(num_filters*2, num_filters*2, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.MaxPool2d(2, 2)
+          ,nn.Conv2d(num_filters*2, num_filters*4, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.Conv2d(num_filters*4, num_filters*4, kernel_size=5,stride=1,padding=2)
+          ,nn.ReLU()
+          ,nn.MaxPool2d(2, 2)
+        )
+        self.linear_layers = nn.Sequential(
+             nn.Flatten()
+            ,nn.Linear(num_filters*4*4*4, 60)
+            ,nn.ReLU()
+            ,nn.Linear(60, 10)
+        )
+
+        self.num_classes = num_classes
+
+
+      
+    def forward(self, x):
+        """
+        Performs a forward pass through the model
+        Args:
+            x: Input image, shape: [batch_size, 3, 32, 32]
+        """
+        batch_size = x.shape[0]
+        # Convolutional layers and maxpooling
+        x = self.conv_layers(x)
+        # Linear layer
+        x = self.linear_layers(x)
+
+        out = x
+        expected_shape = (batch_size, self.num_classes)
+        assert out.shape == (batch_size, self.num_classes),\
+            f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
+        return out
+
+
+class ExampleModel2(nn.Module):
+    """To run vs model with highest improvements"""
+    def __init__(self,
+                 image_channels,
+                 num_classes):
+        """
+            Is called when model is initialized.
+            Args:
+                image_channels. Number of color channels in image (3)
+                num_classes: Number of classes we want to predict (10)
+        """
+        super().__init__()
         num_filters = 32  # Set number of filters in first conv layer
 
         self.conv_layers = nn.Sequential(
@@ -60,29 +122,20 @@ class ExampleModel(nn.Module):
         )
 
         self.num_classes = num_classes
-
-
-      
     def forward(self, x):
         """
         Performs a forward pass through the model
         Args:
             x: Input image, shape: [batch_size, 3, 32, 32]
         """
-        batch_size = x.shape[0]
         # Convolutional layers and maxpooling
         x = self.conv_layers(x)
         # Linear layer
         x = self.linear_layers(x)
-
-        out = x
-        expected_shape = (batch_size, self.num_classes)
-        assert out.shape == (batch_size, self.num_classes),\
-            f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
-        return out
-
+        return x
 
 class Model(nn.Module):
+    #the resnet model
     def __init__(self, num_classes):
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
@@ -115,6 +168,24 @@ def create_plots(trainer: Trainer, name: str):
     plt.savefig(plot_path.joinpath(f"{name}_plot.png"))
     plt.show()
 
+def create_improvement_plot(trainer1, trainer2, name = None):
+    plot_path = pathlib.Path("plots")
+    plot_path.mkdir(exist_ok=True)
+    # Save plots and show them
+    plt.figure(figsize=(20, 8))
+    plt.subplot(1, 2, 1)
+    plt.title("model 1, with batch norm")
+    utils.plot_loss(trainer1.train_history["loss"], label="Training loss", npoints_to_average=10)
+    utils.plot_loss(trainer1.validation_history["loss"], label="Validation loss")
+    plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.title("Model 2")
+    utils.plot_loss(trainer2.train_history["loss"], label="Training loss", npoints_to_average=10)
+    utils.plot_loss(trainer2.validation_history["loss"], label="Validation loss")
+    plt.legend()
+    if name: plt.savefig(plot_path.joinpath(f"{name}_plot.png"))
+    plt.show()
+
 
 if __name__ == "__main__":
     # Set the random generator seed (parameters, shuffling etc).
@@ -126,6 +197,7 @@ if __name__ == "__main__":
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
     model = ExampleModel(image_channels=3,num_classes=10)#Model(num_classes=10)
+    model2 = ExampleModel2(image_channels=3,num_classes=10)
     trainer = Trainer(
         batch_size,
         learning_rate,
@@ -134,20 +206,30 @@ if __name__ == "__main__":
         model,
         dataloaders
     )
+    trainer2 = Trainer(
+        batch_size,
+        learning_rate,
+        early_stop_count,
+        epochs,
+        model2,
+        dataloaders
+    )
     trainer.train()
-    create_plots(trainer, "task3_best")
-    # Calculate validation loss and accuracy
-    validation_loss, validation_acc = compute_loss_and_accuracy(
-        trainer.dataloader_val, trainer.model, trainer.loss_criterion
-    )
-    # Calculate training loss and accuracy
-    train_loss, train_acc = compute_loss_and_accuracy(
-        trainer.dataloader_train, trainer.model, trainer.loss_criterion
-    )
-    # Calculate test loss and accuracy
-    test_loss, test_acc = compute_loss_and_accuracy(
-        trainer.dataloader_test, trainer.model, trainer.loss_criterion
-    )
-    print('Training accuracy and loss was:',train_acc,' and ', train_loss)
-    print('Validation accuracy and loss was:',validation_acc,' and ', validation_loss)
-    print('Test accuracy and loss was:', test_acc, ' and ', test_loss)
+    trainer2.train()
+    create_improvement_plot(trainer2, trainer, name = "task3_vs")
+    # #create_plots(trainer, "task3_best")
+    # # Calculate validation loss and accuracy
+    # validation_loss, validation_acc = compute_loss_and_accuracy(
+    #     trainer.dataloader_val, trainer.model, trainer.loss_criterion
+    # )
+    # # Calculate training loss and accuracy
+    # train_loss, train_acc = compute_loss_and_accuracy(
+    #     trainer.dataloader_train, trainer.model, trainer.loss_criterion
+    # )
+    # # Calculate test loss and accuracy
+    # test_loss, test_acc = compute_loss_and_accuracy(
+    #     trainer.dataloader_test, trainer.model, trainer.loss_criterion
+    # )
+    # print('Training accuracy and loss was:',train_acc,' and ', train_loss)
+    # print('Validation accuracy and loss was:',validation_acc,' and ', validation_loss)
+    # print('Test accuracy and loss was:', test_acc, ' and ', test_loss)
