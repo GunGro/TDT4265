@@ -1,6 +1,21 @@
 import torch
 from torch import nn
 
+def create_block(output_channels, i):
+    if i == len(output_channels) - 1:
+        return nn.Sequential(
+              nn.Conv2d(output_channels[i], 128, kernel_size=3, stride=1, padding=1)
+             ,nn.ReLU()
+             ,nn.Conv2d(128, output_channels[i+1], kernel_size=3, stride=1, padding=0)
+             )
+    else:
+        return nn.Sequential(
+              nn.Conv2d(output_channels[i], 128, kernel_size=3, stride=1, padding=1)
+             ,nn.ReLU()
+             ,nn.Conv2d(128, output_channels[i+1], kernel_size=3, stride=2, padding=1)
+             ,nn.ReLU()
+             )
+
 
 class BasicModel(torch.nn.Module):
     """
@@ -20,12 +35,11 @@ class BasicModel(torch.nn.Module):
         self.output_channels = output_channels
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
-
-        self.layers = nn.Sequential(
-           nn.Conv2d(image_channels, 32, kernel_size=3,stride=1,padding=1)
-          ,nn.MaxPool2d(2, 2)
-          ,nn.ReLU()
-
+        
+        self.start = nn.Sequential(
+          nn.Conv2d(image_channels, 32, kernel_size=3,stride=1,padding=1)
+         ,nn.MaxPool2d(2, 2)
+         ,nn.ReLU()
          ,nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
          ,nn.MaxPool2d(2, 2)
          ,nn.ReLU()
@@ -33,35 +47,14 @@ class BasicModel(torch.nn.Module):
          ,nn.Conv2d(64,64, kernel_size=3, stride=1, padding=1)
          ,nn.MaxPool2d(2, 2)
          ,nn.ReLU()
-
-         ,nn.Conv2d(64, output_channels[0], kernel_size=3, stride=2, padding=1)
-
+         ,nn.Conv2d(64, output_channels[0], kernel_size=3, stride=1, padding=1)
          ,nn.ReLU()
-         ,nn.Conv2d(output_channels[0], 128, kernel_size=3, stride=1, padding=1)
-         ,nn.ReLU()
-         ,nn.Conv2d(128, output_channels[1], kernel_size=3, stride=2, padding=1)
-
-         ,nn.ReLU()
-         ,nn.Conv2d(output_channels[1], 256, kernel_size=3, stride=1, padding=1)
-         ,nn.ReLU()
-         ,nn.Conv2d(256, output_channels[2], kernel_size=3, stride=2, padding=1)
-
-         ,nn.ReLU()
-         ,nn.Conv2d(output_channels[2], 128, kernel_size=3, stride=1, padding=1)
-         ,nn.ReLU()
-         ,nn.Conv2d(128, output_channels[3], kernel_size=3, stride=2, padding=1)
-
-         ,nn.ReLU()
-         ,nn.Conv2d(output_channels[3], 128, kernel_size=3, stride=1, padding=1)
-         ,nn.ReLU()
-         ,nn.Conv2d(128, output_channels[4], kernel_size=3, stride=2, padding=1)
-
-         ,nn.ReLU()
-         ,nn.Conv2d(output_channels[4], 128, kernel_size=3, stride=1, padding=1)
-         ,nn.ReLU()
-         ,nn.Conv2d(128, output_channels[5], kernel_size=3, stride=1, padding=0)
-
-        )
+         )
+        
+        self.blocks = [0]*len(output_channels)
+        
+        for i in range(len(output_channels)):
+            self.blocks[i] = create_block(output_channels, i)
 
 
 
@@ -78,7 +71,11 @@ class BasicModel(torch.nn.Module):
         where out_features[0] should have the shape:
             shape(-1, output_channels[0], 38, 38),
         """
+        x = self.start(x)
         out_features = []
+        for block in self.blocks:
+            out_features.append(block(x))
+            x = block(x)
         for idx, feature in enumerate(out_features):
             w, h = self.output_feature_shape[idx]
             expected_shape = (out_channel, h, w)
@@ -86,7 +83,7 @@ class BasicModel(torch.nn.Module):
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
 
 
-        x = self.layers(x)
+       
 
         return tuple(out_features)
 
