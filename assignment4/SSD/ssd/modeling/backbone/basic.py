@@ -1,4 +1,5 @@
 import torch
+from torch import nn
 
 
 class BasicModel(torch.nn.Module):
@@ -20,6 +21,50 @@ class BasicModel(torch.nn.Module):
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
 
+        self.layers = nn.Sequential(
+           nn.Conv2d(image_channels, 32, kernel_size=3,stride=1,padding=1)
+          ,nn.MaxPool2d(2, 2)
+          ,nn.ReLU()
+
+         ,nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+         ,nn.MaxPool2d(2, 2)
+         ,nn.ReLU()
+
+         ,nn.Conv2d(64,64, kernel_size=3, stride=1, padding=1)
+         ,nn.MaxPool2d(2, 2)
+         ,nn.ReLU()
+
+         ,nn.Conv2d(64, output_channels[0], kernel_size=3, stride=2, padding=1)
+
+         ,nn.ReLU()
+         ,nn.Conv2d(output_channels[0], 128, kernel_size=3, stride=1, padding=1)
+         ,nn.ReLU()
+         ,nn.Conv2d(128, output_channels[1], kernel_size=3, stride=2, padding=1)
+
+         ,nn.ReLU()
+         ,nn.Conv2d(output_channels[1], 256, kernel_size=3, stride=1, padding=1)
+         ,nn.ReLU()
+         ,nn.Conv2d(256, output_channels[2], kernel_size=3, stride=2, padding=1)
+
+         ,nn.ReLU()
+         ,nn.Conv2d(output_channels[2], 128, kernel_size=3, stride=1, padding=1)
+         ,nn.ReLU()
+         ,nn.Conv2d(128, output_channels[3], kernel_size=3, stride=2, padding=1)
+
+         ,nn.ReLU()
+         ,nn.Conv2d(output_channels[3], 128, kernel_size=3, stride=1, padding=1)
+         ,nn.ReLU()
+         ,nn.Conv2d(128, output_channels[4], kernel_size=3, stride=2, padding=1)
+
+         ,nn.ReLU()
+         ,nn.Conv2d(output_channels[4], 128, kernel_size=3, stride=1, padding=1)
+         ,nn.ReLU()
+         ,nn.Conv2d(128, output_channels[5], kernel_size=3, stride=1, padding=0)
+
+        )
+
+
+
     def forward(self, x):
         """
         The forward functiom should output features with shape:
@@ -39,5 +84,9 @@ class BasicModel(torch.nn.Module):
             expected_shape = (out_channel, h, w)
             assert feature.shape[1:] == expected_shape, \
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
+
+
+        x = self.layers(x)
+
         return tuple(out_features)
 

@@ -17,8 +17,6 @@ def calculate_iou(prediction_box, gt_box):
     """
     # Compute intersection
 
-
-
     intersection = max(0, min(gt_box[2], prediction_box[2]) - max(gt_box[0], prediction_box[0])) * max(0, min(gt_box[3], prediction_box[3]) - max(gt_box[1], prediction_box[1]))
 
     # Compute union
@@ -101,10 +99,8 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             predboxes_matched.append(predbox)
             gtboxes_matched.append(maxBox)
 
-
     predboxes_matched = np.array(predboxes_matched)
     gtboxes_matched = np.array(gtboxes_matched)
-
 
     return predboxes_matched, gtboxes_matched
 
