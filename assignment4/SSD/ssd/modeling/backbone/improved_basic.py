@@ -6,9 +6,9 @@ def create_block(output_channels, i):
     if i == len(output_channels) - 2:
         return nn.Sequential(
               nn.ReLU()
-             ,nn.Conv2d(output_channels[i], 128, kernel_size=3, stride=1, padding=1)
+             ,nn.Conv2d(output_channels[i], 256, kernel_size=3, stride=1, padding=1)
              ,nn.ReLU()
-             ,nn.Conv2d(128, output_channels[i+1], kernel_size=3, stride=1, padding=0)
+             ,nn.Conv2d(256, output_channels[i+1], kernel_size=3, stride=1, padding=0)
              )
     elif i == 1:
         return nn.Sequential(
@@ -46,23 +46,25 @@ class BasicModel(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
         
         self.start = nn.Sequential(
-          nn.Conv2d(image_channels, 32, kernel_size=3,stride=1,padding=1)
+          nn.Conv2d(image_channels, 128, kernel_size=3,stride=1,padding=1)
          ,nn.MaxPool2d(2, 2)
          ,nn.ReLU()
-         ,nn.BatchNorm2d(32)
-         ,nn.Dropout2d(0.2)
+         ,nn.BatchNorm2d(128)
          
-         ,nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+         ,nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
          ,nn.MaxPool2d(2, 2)
          ,nn.ReLU()
-         ,nn.BatchNorm2d(64)
-         ,nn.Dropout2d(0.3)
+         ,nn.BatchNorm2d(256)
 
-         ,nn.Conv2d(64,64, kernel_size=3, stride=1, padding=1)
+         ,nn.Conv2d(256,512, kernel_size=3, stride=1, padding=1)
          ,nn.ReLU()
-         ,nn.Conv2d(64, output_channels[0], kernel_size=3, stride=2, padding=1)
+         ,nn.Conv2d(512, 512, kernel_size=3, stride=2, padding=1)
+         ,nn.BatchNorm2d(512)
+
+         ,nn.Conv2d(512, 1024, kernel_size=3, stride=1, padding=1)
+         ,nn.ReLU()
+         ,nn.Conv2d(1024, output_channels[0], kernel_size=3, stride=1, padding=1)
          ,nn.BatchNorm2d(output_channels[0])
-         ,nn.Dropout2d(0.4)
          )
         
         self.blocks = [0]*(len(output_channels)-1)
