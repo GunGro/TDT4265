@@ -16,7 +16,6 @@ def calculate_iou(prediction_box, gt_box):
             float: value of the intersection of union for the two boxes.
     """
     # Compute intersection
-
     intersection = max(0, min(gt_box[2], prediction_box[2]) - max(gt_box[0], prediction_box[0])) * max(0, min(gt_box[3], prediction_box[3]) - max(gt_box[1], prediction_box[1]))
 
     # Compute union
@@ -202,9 +201,16 @@ def get_precision_recall_curve(
 
     precisions = [] 
     recalls = []
-
-    for threshold in confidence_thresholds:
-        precision, recall = calculate_precision_recall_all_images(all_prediction_boxes, all_gt_boxes, threshold)
+    
+    
+    for confidence_th in  confidence_thresholds:
+        filtered_pred = [None]*len(all_prediction_boxes)
+        for i, (score, prediction_box) in enumerate(zip(confidence_scores,all_prediction_boxes)):
+            index = np.argwhere(score >  confidence_th )
+            filtered_pred[i] = prediction_box[index[:,0]]
+        
+    
+        precision, recall = calculate_precision_recall_all_images(filtered_pred, all_gt_boxes, iou_threshold)
         precisions.append(precision)
         recalls.append(recall)
 
@@ -241,10 +247,25 @@ def calculate_mean_average_precision(precisions, recalls):
     Returns:
         float: mean average precision
     """
+    print(precisions, recalls)
     # Calculate the mean average precision given these recall levels.
     recall_levels = np.linspace(0, 1.0, 11)
+    dx = 1.0/10
     # YOUR CODE HERE
     average_precision = 0
+    for i in range(len(recall_levels)-1):
+        idx = np.argwhere(recalls <= recall_levels[i+1])
+        print(idx)
+        idx = np.setdiff1d(idx, np.argwhere(recalls > recall_levels[i]))
+        print(idx)
+        #is it empty?
+        if idx.size: # not empty
+            idx = np.argmax(precisions[idx])
+            # update average prec
+            average_precision += precisions[idx]*dx
+        else: # empty
+            #pick the previous
+            average_precision += precisions[idx]*dx
     return average_precision
 
 
