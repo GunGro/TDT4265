@@ -1,6 +1,7 @@
 from torch import nn
 from ssd.modeling.backbone.vgg import VGG
-from ssd.modeling.backbone.basic import BasicModel
+import ssd.modeling.backbone.basic as basic
+import ssd.modeling.backbone.improved_basic as improved_basic
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
@@ -31,7 +32,7 @@ class SSDDetector(nn.Module):
 def build_backbone(cfg):
     backbone_name = cfg.MODEL.BACKBONE.NAME
     if backbone_name == "basic":
-        model = BasicModel(cfg)
+        model = basic.BasicModel(cfg)
         return model
     if backbone_name == "vgg":
         model = VGG(cfg)
@@ -39,4 +40,7 @@ def build_backbone(cfg):
             state_dict = load_state_dict_from_url(
                 "https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth")
             model.init_from_pretrain(state_dict)
+        return model
+    if backbone_name == "improved_basic":
+        model = improved_basic.BasicModel(cfg)
         return model
