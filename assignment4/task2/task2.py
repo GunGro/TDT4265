@@ -255,9 +255,9 @@ def calculate_mean_average_precision(precisions, recalls):
     average_precision = 0
     for i in range(len(recall_levels)-1):
         idx = np.argwhere(recalls <= recall_levels[i+1])
-        print(idx)
+        #print(idx)
         idx = np.setdiff1d(idx, np.argwhere(recalls > recall_levels[i]))
-        print(idx)
+        #print(idx)
         #is it empty?
         if idx.size: # not empty
             idx = np.argmax(precisions[idx])

@@ -2,12 +2,21 @@ import torch
 from torch import nn
 
 def create_block(output_channels, i):
-    if i == len(output_channels) - 1:
+    print(output_channels)
+    if i == len(output_channels) - 2:
+        print('hei')
         return nn.Sequential(
               nn.ReLU()
              ,nn.Conv2d(output_channels[i], 128, kernel_size=3, stride=1, padding=1)
              ,nn.ReLU()
              ,nn.Conv2d(128, output_channels[i+1], kernel_size=3, stride=1, padding=0)
+             )
+    elif i == 1:
+        return nn.Sequential(
+              nn.ReLU()
+             ,nn.Conv2d(output_channels[i], 256, kernel_size=3, stride=1, padding=1)
+             ,nn.ReLU()
+             ,nn.Conv2d(256, output_channels[i+1], kernel_size=3, stride=2, padding=1)
              )
     else:
         return nn.Sequential(
@@ -48,11 +57,10 @@ class BasicModel(torch.nn.Module):
 
          ,nn.Conv2d(64,64, kernel_size=3, stride=1, padding=1)
          ,nn.ReLU()
-         ,nn.Conv2d(64, output_channels[0], kernel_size=3, stride=1, padding=1)
+         ,nn.Conv2d(64, output_channels[0], kernel_size=3, stride=2, padding=1)
          )
         
-        self.blocks = [0]*len(output_channels)
-        
+        self.blocks = [0]*(len(output_channels)-1)
         for i in range(len(output_channels)-1):
             self.blocks[i] = create_block(output_channels, i)
 
@@ -75,11 +83,13 @@ class BasicModel(torch.nn.Module):
         out_features = []
         for block in self.blocks:
             with torch.no_grad():
-                out_features.append(block(x))
+                out_features.append(x)
             x = block(x)
+        with torch.no_grad():
+            out_features.append(x)
         for idx, feature in enumerate(out_features):
             w, h = self.output_feature_shape[idx]
-            expected_shape = (out_channel, h, w)
+            expected_shape = (self.output_channels[idx], h, w)
             assert feature.shape[1:] == expected_shape, \
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
 
