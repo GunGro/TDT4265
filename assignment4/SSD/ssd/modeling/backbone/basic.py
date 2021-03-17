@@ -1,10 +1,9 @@
 import torch
 from torch import nn
+from ssd import torch_utils
 
 def create_block(output_channels, i):
-    print(output_channels)
     if i == len(output_channels) - 2:
-        print('hei')
         return nn.Sequential(
               nn.ReLU()
              ,nn.Conv2d(output_channels[i], 128, kernel_size=3, stride=1, padding=1)
@@ -63,6 +62,10 @@ class BasicModel(torch.nn.Module):
         self.blocks = [0]*(len(output_channels)-1)
         for i in range(len(output_channels)-1):
             self.blocks[i] = create_block(output_channels, i)
+            self.blocks[i] = torch_utils.to_cuda(self.blocks[i])
+            
+        
+        self = torch_utils.to_cuda(self)
 
 
 
